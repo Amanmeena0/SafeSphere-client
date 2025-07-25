@@ -1,0 +1,68 @@
+.map-container {
+  height: 80vh;
+  width: 100%;
+  margin-top: 20px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.search-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 15px;
+  gap: 10px;
+}
+
+.search-controls input {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  width: 250px;
+  transition: border 0.3s ease;
+}
+
+.search-controls input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.search-controls button {
+  padding: 10px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.search-controls button:hover {
+  background-color: #0056b3;
+}
+
+.stations-list {
+  margin-top: 20px;
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.stations-list h3 {
+  margin-bottom: 10px;
+}
+
+.stations-list li {
+  margin-bottom: 8px;
+}
+
+.stations-list a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.stations-list a:hover {
+  text-decoration: underline;
+}
