@@ -1,6 +1,6 @@
 // ======= FRONTEND: NewUserForm.jsx =======
 import { useState } from 'react';
-import { useUser } from '@clerk/clerk-react';
+import { useUser } from '../../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import backend from '@/config';
 
@@ -44,7 +44,7 @@ export default function NewUserForm() {
         },
         body: JSON.stringify({
           ...formData,
-          clerkUserId: user?.id,
+          authId: user?.id,
           email: user?.primaryEmailAddress?.emailAddress
         }),
       });
@@ -59,15 +59,6 @@ export default function NewUserForm() {
 
       if (response.ok) {
         setMessage('Profile created successfully!');
-
-        // Call backend to update Clerk metadata
-        await fetch(`${backend.apiUrl}/profile/update-metadata/${user.id}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            role: formData.role
-          })
-        });
 
         setTimeout(() => {
           navigate('/profile');

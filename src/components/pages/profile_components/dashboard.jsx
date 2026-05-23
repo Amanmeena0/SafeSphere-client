@@ -1,4 +1,4 @@
-import { useUser } from "@clerk/nextjs";
+import { useUser } from "../../../hooks/useAuth";
 import SOData from "../sos_components/sos_Data";
 
 export default function Dashboard() {

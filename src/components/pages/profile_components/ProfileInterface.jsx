@@ -1,4 +1,4 @@
-import { useUser } from "@clerk/clerk-react";
+import { useUser } from "../../../hooks/useAuth";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -12,18 +12,18 @@ export default function ProfileInterface() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const clerkUserId = user?.id;
+  const authId = user?.id;
 
   useEffect(() => {
-    if (clerkUserId) {
-      axios.get(`${backend.apiUrl}/api/profile/${clerkUserId}`)
+    if (authId) {
+      axios.get(`${backend.apiUrl}/api/profile/${authId}`)
         .then(res => setProfile(res.data))
         .catch(err => {
           console.error("Failed to fetch profile", err);
           alert("Failed to load profile data");
         });
     }
-  }, [clerkUserId]);
+  }, [authId]);
 
   const handleDeleteAccount = async () => {
     if (!user) return;
@@ -31,12 +31,9 @@ export default function ProfileInterface() {
 
     try {
       // Step 1: Delete user data from your backend
-      await axios.delete(`${backend.apiUrl}/api/profile/${clerkUserId}`);
+      await axios.delete(`${backend.apiUrl}/api/profile/${authId}`);
 
-      // Step 2: Delete user from Clerk
-      await user.delete();
-
-      // Step 3: Redirect to homepage
+      // Step 2: Redirect to homepage
       navigate('/');
     } catch (error) {
       console.error("Error deleting account:", error);

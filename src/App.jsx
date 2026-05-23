@@ -1,6 +1,6 @@
 // App.jsx
 import { Routes, Route, Navigate } from "react-router-dom";
-import { SignedIn, SignedOut } from "@clerk/clerk-react";
+import { SignedIn, SignedOut } from "./hooks/useAuth";
 import Home from './components/Home';
 // statistics components
 import Statistics from './components/Satistical';
@@ -28,8 +28,6 @@ import ChatWidget from './components/pages/Chabot/bot';
 // about us
 import AboutUs from './components/AboutUs';
 // profile components
-import SignUpPage from "./components/pages/profile_components/signUP";
-import SignInPage from "./components/pages/profile_components/signIN";
 import ProfileInterface from "./components/pages/profile_components/ProfileInterface";
 import NewUserForm from "./components/pages/profile_components/NewUserForm";
 
@@ -42,36 +40,12 @@ function App() {
           <Routes>
             
             <Route path="/" element={<Home />} />
-            <Route path="/home" element={<SignedIn><Home /></SignedIn>} />
-            <Route path="/profile" element={<SignedIn><ProfileInterface /></SignedIn>} />
-            <Route path="/sign-up" element={
-                <>
-                  <SignedOut>
-                    <SignUpPage />
-                  </SignedOut>
-                  <SignedIn>
-                    <Navigate to="/profile" />
-                  </SignedIn>
-                </>
-              }
-            />
-            <Route
-              path="/sign-in"
-              element={
-                <>
-                  <SignedOut>
-                    <SignInPage />
-                  </SignedOut>
-                  <SignedIn>
-                    <Navigate to="/profile" />
-                  </SignedIn>
-                </>
-              }
-            />
-            <Route path="/create-profile" element={<SignedIn><NewUserForm /></SignedIn>} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/profile" element={<ProfileInterface />} />
+            <Route path="/create-profile" element={<NewUserForm />} />
             
             {/* statistics */}
-            <Route path="/statistics" element={<SignedIn><Statistics /></SignedIn>} />
+            <Route path="/statistics" element={<Statistics />} />
             {/* fir register */}
             <Route path="/FirRegister" element={<FirRegister />} />
             <Route path="/lostItemReport" element={<LostReportForm />} />
@@ -92,12 +66,10 @@ function App() {
             <Route path="/about" element={<AboutUs />} />
             
             {/* Default route fallback */}
-            <Route path="*" element={<Navigate to="/sign-in" />} />
+            <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </div>
-        <SignedIn>
-          <ChatWidget />
-        </SignedIn>
+        <ChatWidget />
       </div>
     </>
   );

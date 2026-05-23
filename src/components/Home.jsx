@@ -1,5 +1,5 @@
 import Header from './pages/Home_Page_components/Header';
-import { useUser } from "@clerk/clerk-react"; 
+import { useUser } from "../hooks/useAuth"; 
 import Contact from './Contact';
 import SOData from './pages/sos_components/sos_Data';
 
@@ -15,7 +15,7 @@ const Home = () => {
     );
   }
 
-  const role = user?.publicMetadata?.role;
+  const role = user?.publicMetadata?.role || 'civilian';
   const userName = user?.firstName || user?.username || 'User';
 
   return (

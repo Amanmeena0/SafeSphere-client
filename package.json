@@ -10,8 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@clerk/clerk-react": "^5.33.0",
-    "@clerk/react-router": "^1.7.0",
     "@radix-ui/react-slot": "^1.2.3",
     "@tailwindcss/vite": "^4.1.11",
     "axios": "^1.7.2",

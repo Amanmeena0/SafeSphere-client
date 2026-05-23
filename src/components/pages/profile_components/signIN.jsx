@@ -1,9 +1,14 @@
-import { SignIn, SignOutButton, useUser } from "@clerk/clerk-react";
+import { useUser } from "../../../hooks/useAuth";
 import { User } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function SignInPage() {
   const { isSignedIn } = useUser();
+  const navigate = useNavigate();
+
+  const handleSignIn = () => {
+    navigate("/profile");
+  };
 
   if (isSignedIn) {
     return (
@@ -21,11 +26,9 @@ export default function SignInPage() {
               View Profile
             </Link>
             
-            <SignOutButton>
-              <button className="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-6 rounded-md transition-colors">
-                Sign Out
-              </button>
-            </SignOutButton>
+            <button className="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-6 rounded-md transition-colors">
+              Sign Out
+            </button>
           </div>
         </div>
       </div>
@@ -33,12 +36,17 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-50">
-      <SignIn 
-        forceRedirectUrl="/"
-        routing="path"
-        path="/sign-in"
-      />
+    <div className="flex flex-col items-center justify-center min-h-[60vh] bg-white p-8 rounded-lg shadow-md max-w-md mx-auto mt-10 text-center">
+      <h2 className="text-2xl font-bold mb-6 text-gray-800">Sign In to SafeSphere</h2>
+      <p className="text-gray-600 mb-8">
+        This is a mock sign-in page since Clerk has been removed.
+      </p>
+      <button 
+        onClick={handleSignIn}
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200"
+      >
+        Continue with Mock User
+      </button>
     </div>
   );
 }
