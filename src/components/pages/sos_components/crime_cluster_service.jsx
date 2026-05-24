@@ -98,7 +98,7 @@ const CrimeMap = () => {
             </svg>
             Filter Options
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="group">
               <label className="block text-sm font-medium text-gray-700 mb-2">Attack Type</label>
               <select
@@ -108,6 +108,20 @@ const CrimeMap = () => {
               >
                 <option value="">All Attack Types</option>
                 {getUniqueValues("attack type").map((val, i) => (
+                  <option key={i} value={val}>{val}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="group">
+              <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+              <select
+                className="w-full p-3 bg-white/80 backdrop-blur-sm border-2 border-gray-200 rounded-xl shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-300 hover:shadow-xl group-hover:border-blue-300"
+                value={cityFilter}
+                onChange={(e) => setCityFilter(e.target.value)}
+              >
+                <option value="">All Cities</option>
+                {getUniqueValues("city").map((val, i) => (
                   <option key={i} value={val}>{val}</option>
                 ))}
               </select>
