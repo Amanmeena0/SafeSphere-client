@@ -1,45 +1,44 @@
 import { Link } from 'react-router-dom';
-import { SignedOut } from '../../../hooks/useAuth';
+import { SignedOut, SignedIn, useUser } from '../../../hooks/useAuth';
 
 const Navbar = () => {
+  const { user } = useUser();
+
   return (
-    <nav className="bg-white border-b shadow-sm">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <div className="flex items-center space-x-3">
-          <div className="h-10 w-10 bg-gray-200 rounded-full flex items-center justify-center text-sm text-gray-500">
-            <img src="src/assets/Logo.png" alt="Logo" className="rounded-" />
-          </div>
-          <div className="text-xl font-bold text-blue-700">
-            SafeSphere
+    <header className="fixed top-0 w-full z-50 bg-surface-container-lowest/80 backdrop-blur-md border-b border-outline-variant/50">
+      <nav className="flex justify-between items-center w-full px-margin-desktop py-4 max-w-container-max mx-auto">
+        <div className="flex items-center gap-8">
+          <Link className="flex items-center gap-3 group" to="/">
+            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center group-hover:rotate-12 smooth-transition shadow-lg shadow-primary/20">
+              <img src="/src/assets/Logo.png" alt="SafeSphere Logo" className="w-6 h-6 invert" />
+            </div>
+            <span className="font-display-lg text-title-md font-bold text-primary tracking-tight">SafeSphere</span>
+          </Link>
+          <div className="hidden md:flex items-center gap-8">
+            <Link className="font-body-md text-sm font-semibold text-primary hover:text-secondary smooth-transition" to="/">Home</Link>
+            <Link className="font-body-md text-sm font-semibold text-on-surface-variant hover:text-primary smooth-transition" to="/FirRegister">Services</Link>
+            <Link className="font-body-md text-sm font-semibold text-on-surface-variant hover:text-primary smooth-transition" to="/statistics">Statistics</Link>
+            <Link className="font-body-md text-sm font-semibold text-on-surface-variant hover:text-primary smooth-transition" to="/about">About</Link>
           </div>
         </div>
-
-        <div className="flex space-x-8 text-base font-semibold text-gray-800">
-          <Link to="/home" className="hover:text-blue-600 transition duration-200 ease-in-out">Home</Link>
-          <Link to="/statistics" className="hover:text-blue-600 transition duration-200 ease-in-out">Statistics</Link>
-          <Link to="/FirRegister" className="hover:text-blue-600 transition duration-200 ease-in-out">FIR Registration</Link>
-          <Link to="/sos" className="hover:text-blue-600 transition duration-200 ease-in-out">SOS</Link>
-          <Link to="/about" className="hover:text-blue-600 transition duration-200 ease-in-out">About US</Link>
-        </div>
-
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center gap-4">
           <SignedOut>
-            <Link 
-              to="/sign-in" 
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition duration-200 ease-in-out"
-            >
-              Sign In
-            </Link>
-            <Link 
-              to="/sign-up" 
-              className="border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white px-4 py-2 rounded-md transition duration-200 ease-in-out"
-            >
-              Sign Up
+            <Link to="/sign-in" className="font-body-md text-sm font-bold text-on-surface-variant hover:text-primary smooth-transition px-4">Sign In</Link>
+            <Link to="/sign-up" className="bg-primary text-on-primary px-6 py-2.5 rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-container hover:scale-105 active:scale-95 smooth-transition font-bold text-sm">
+              Get Started
             </Link>
           </SignedOut>
+          <SignedIn>
+             <Link to="/profile" className="flex items-center gap-3 p-1.5 pr-4 bg-surface-container rounded-full border border-outline-variant hover:border-primary smooth-transition group">
+                <div className="w-8 h-8 bg-primary-fixed rounded-full flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary smooth-transition">
+                   <span className="material-symbols-outlined text-xl">person</span>
+                </div>
+                <span className="font-body-md text-sm font-bold text-primary">{user?.firstName || 'Account'}</span>
+             </Link>
+          </SignedIn>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </header>
   );
 };
 

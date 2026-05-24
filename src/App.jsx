@@ -6,6 +6,7 @@ import Home from './components/Home';
 import Statistics from './components/Satistical';
 // home
 import Navbar from './components/pages/Home_Page_components/Navbar';
+import Footer from './components/pages/Home_Page_components/Footer';
 import './index.css';
 // {fir components}
 import FirRegister from './components/FirRegister';
@@ -34,9 +35,9 @@ import NewUserForm from "./components/pages/profile_components/NewUserForm";
 function App() {
   return (
     <>
-      <div className="bg-gray-100 min-h-screen text-black">
+      <div className="bg-background min-h-screen text-on-surface">
         <Navbar/>
-        <div className="container mx-auto p-4">
+        <div className="w-full">
           <Routes>
             
             <Route path="/" element={<Home />} />
@@ -69,6 +70,7 @@ function App() {
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </div>
+        <Footer />
         <ChatWidget />
       </div>
     </>
