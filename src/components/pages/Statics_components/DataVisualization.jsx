@@ -12,6 +12,8 @@ import {
     Legend,
 } from 'chart.js';
 import PropTypes from 'prop-types';
+import { motion } from 'framer-motion';
+import { PieChart, BarChart, TrendingUp, Shield } from 'lucide-react';
 
 ChartJS.register(
     CategoryScale,
@@ -26,7 +28,6 @@ ChartJS.register(
 );
 
 const DataVisualization = ({ data }) => {
-    // Prepare data for different visualizations
     const getCrimeTypeData = () => {
         const crimeTypes = {};
         data.forEach(item => {
@@ -40,15 +41,16 @@ const DataVisualization = ({ data }) => {
         });
 
         return {
-            labels: Object.keys(crimeTypes).map(key => key.charAt(0).toUpperCase() + key.slice(1)),
+            labels: Object.keys(crimeTypes).map(key => key.toUpperCase()),
             datasets: [{
                 data: Object.values(crimeTypes),
                 backgroundColor: [
-                    '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4',
-                    '#FECA57', '#FF9FF3', '#54A0FF', '#5F27CD'
+                    'rgba(239, 68, 68, 0.8)', 'rgba(59, 130, 246, 0.8)', 'rgba(245, 158, 11, 0.8)', 
+                    'rgba(16, 185, 129, 0.8)', 'rgba(139, 92, 246, 0.8)', 'rgba(236, 72, 153, 0.8)', 
+                    'rgba(20, 184, 166, 0.8)', 'rgba(100, 116, 139, 0.8)'
                 ],
-                borderWidth: 2,
-                borderColor: '#fff'
+                borderWidth: 0,
+                hoverOffset: 20
             }]
         };
     };
@@ -64,14 +66,14 @@ const DataVisualization = ({ data }) => {
             .slice(0, 10);
 
         return {
-            labels: sortedStates.map(([state]) => state),
+            labels: sortedStates.map(([state]) => state.toUpperCase()),
             datasets: [{
-                label: 'Total Crimes',
+                label: 'Aggregate Volume',
                 data: sortedStates.map(([, crimes]) => crimes),
-                backgroundColor: 'rgba(59, 130, 246, 0.8)',
-                borderColor: 'rgb(59, 130, 246)',
-                borderWidth: 1,
-                borderRadius: 4
+                backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                borderRadius: 8,
+                borderWidth: 0,
+                barThickness: 24
             }]
         };
     };
@@ -87,17 +89,15 @@ const DataVisualization = ({ data }) => {
         return {
             labels: sortedYears.map(([year]) => year),
             datasets: [{
-                label: 'Total Crimes by Year',
+                label: 'Temporal Flow',
                 data: sortedYears.map(([, crimes]) => crimes),
-                borderColor: 'rgb(16, 185, 129)',
-                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                borderColor: 'rgb(59, 130, 246)',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
                 borderWidth: 3,
                 fill: true,
                 tension: 0.4,
-                pointBackgroundColor: 'rgb(16, 185, 129)',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
-                pointRadius: 6
+                pointBackgroundColor: 'rgb(59, 130, 246)',
+                pointRadius: 4
             }]
         };
     };
@@ -106,103 +106,88 @@ const DataVisualization = ({ data }) => {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-            legend: {
-                position: 'top',
-                labels: {
-                    padding: 20,
-                    usePointStyle: true
-                }
-            },
+            legend: { display: false },
             tooltip: {
-                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                titleColor: 'white',
-                bodyColor: 'white',
-                borderColor: 'rgba(255, 255, 255, 0.2)',
+                backgroundColor: '#0f172a',
+                titleColor: '#94a3b8',
+                bodyColor: '#f8fafc',
+                padding: 12,
+                borderColor: 'rgba(255, 255, 255, 0.1)',
                 borderWidth: 1
             }
         },
         scales: {
-            x: {
-                grid: {
-                    display: false
-                },
-                ticks: {
-                    maxRotation: 45
-                }
-            },
-            y: {
-                grid: {
-                    color: 'rgba(0, 0, 0, 0.05)'
-                },
-                ticks: {
-                    callback: function(value) {
-                        return value.toLocaleString();
-                    }
-                }
-            }
+            x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 10, weight: 'bold' } } },
+            y: { grid: { color: 'rgba(255, 255, 255, 0.03)' }, ticks: { color: '#64748b', font: { size: 10 } } }
         }
     };
 
-    const doughnutOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'right',
-                labels: {
-                    padding: 20,
-                    usePointStyle: true
-                }
-            },
-            tooltip: {
-                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                titleColor: 'white',
-                bodyColor: 'white',
-                callbacks: {
-                    label: function(context) {
-                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                        const percentage = ((context.raw / total) * 100).toFixed(1);
-                        return `${context.label}: ${context.raw.toLocaleString()} (${percentage}%)`;
-                    }
-                }
-            }
-        },
-        cutout: '50%'
-    };
-
-    if (!data || data.length === 0) {
-        return (
-            <div className="text-center py-8">
-                <p className="text-gray-500">No data available for visualization</p>
-            </div>
-        );
-    }
+    if (!data || data.length === 0) return null;
 
     return (
         <div className="space-y-8">
-            {/* Crime Types Distribution */}
-            <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">Crime Distribution by Type</h3>
-                <div className="h-96">
-                    <Doughnut data={getCrimeTypeData()} options={doughnutOptions} />
-                </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Distribution Chart */}
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="bg-slate-900/40 border border-slate-800 p-8 rounded-[32px] backdrop-blur-md"
+                >
+                    <div className="flex items-center gap-3 mb-8">
+                        <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500">
+                            <PieChart className="w-5 h-5" />
+                        </div>
+                        <h3 className="text-lg font-bold text-white tracking-tight">Intelligence Composition by Vector</h3>
+                    </div>
+                    <div className="h-80 relative">
+                        <Doughnut data={getCrimeTypeData()} options={{
+                            ...chartOptions,
+                            plugins: { ...chartOptions.plugins, legend: { display: true, position: 'right', labels: { color: '#94a3b8', font: { size: 10, weight: 'bold' }, usePointStyle: true, padding: 15 } } },
+                            cutout: '65%'
+                        }} />
+                        <div className="absolute top-1/2 left-[35%] -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
+                            <Shield className="w-8 h-8 text-slate-800 mx-auto mb-1 opacity-20" />
+                            <div className="text-[10px] font-black text-slate-600 uppercase tracking-widest">Secure Matrix</div>
+                        </div>
+                    </div>
+                </motion.div>
+
+                {/* Regional Bar Chart */}
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.1 }}
+                    className="bg-slate-900/40 border border-slate-800 p-8 rounded-[32px] backdrop-blur-md"
+                >
+                    <div className="flex items-center gap-3 mb-8">
+                        <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
+                            <BarChart className="w-5 h-5" />
+                        </div>
+                        <h3 className="text-lg font-bold text-white tracking-tight">Regional Density Ranking (Top 10)</h3>
+                    </div>
+                    <div className="h-80">
+                        <Bar data={getStateWiseData()} options={chartOptions} />
+                    </div>
+                </motion.div>
             </div>
 
-            {/* State-wise Analysis */}
-            <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">Top 10 States by Crime Count</h3>
-                <div className="h-96">
-                    <Bar data={getStateWiseData()} options={chartOptions} />
+            {/* Linear Temporal Analysis */}
+            <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="bg-slate-900/40 border border-slate-800 p-8 rounded-[32px] backdrop-blur-md"
+            >
+                <div className="flex items-center gap-3 mb-8">
+                    <div className="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center text-teal-500">
+                        <TrendingUp className="w-5 h-5" />
+                    </div>
+                    <h3 className="text-lg font-bold text-white tracking-tight">Temporal Intelligence Progression</h3>
                 </div>
-            </div>
-
-            {/* Yearly Trends */}
-            <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">Crime Trends Over Years</h3>
                 <div className="h-96">
                     <Line data={getYearlyTrend()} options={chartOptions} />
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 };

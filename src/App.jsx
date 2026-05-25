@@ -1,12 +1,10 @@
 // App.jsx
 import { Routes, Route, Navigate } from "react-router-dom";
-import { SignedIn, SignedOut } from "./hooks/useAuth";
 import Home from './components/Home';
 // statistics components
 import Statistics from './components/Satistical';
-// home
-import Navbar from './components/pages/Home_Page_components/Navbar';
-import Footer from './components/pages/Home_Page_components/Footer';
+// layout
+import MainLayout from './components/layout/MainLayout';
 import './index.css';
 // {fir components}
 import FirRegister from './components/FirRegister';
@@ -24,8 +22,6 @@ import SOSReport from './components/pages/sos_components/alert_services';
 import CrimeMap from './components/pages/sos_components/crime_cluster_service';
 import SOData from './components/pages/sos_components/sos_Data';
 import EmergencyContacts from './components/pages/sos_components/contacts-police'
-// chatbot
-import ChatWidget from './components/pages/Chabot/bot';
 // about us
 import AboutUs from './components/AboutUs';
 // profile components
@@ -34,46 +30,38 @@ import NewUserForm from "./components/pages/profile_components/NewUserForm";
 
 function App() {
   return (
-    <>
-      <div className="bg-background min-h-screen text-on-surface">
-        <Navbar/>
-        <div className="w-full">
-          <Routes>
-            
-            <Route path="/" element={<Home />} />
-            <Route path="/home" element={<Home />} />
-            <Route path="/profile" element={<ProfileInterface />} />
-            <Route path="/create-profile" element={<NewUserForm />} />
-            
-            {/* statistics */}
-            <Route path="/statistics" element={<Statistics />} />
-            {/* fir register */}
-            <Route path="/FirRegister" element={<FirRegister />} />
-            <Route path="/lostItemReport" element={<LostReportForm />} />
-            <Route path="/MVTheftEfir" element={<MVTheftFIRForm />} />
-            <Route path="/MissingPersonform" element={<MissingPerson />} />
-            <Route path="/DomesticHelp&TenantRegistration" element={<DomesticTenantForm />} />
-            <Route path="/TheftEfir" element={<TheftEFIRForm />} />
-            <Route path="/CyberCrime" element={<CyberCrimeForm />} />
-            <Route path="/RapeCase" element={<RapeCaseForm />} />
-            {/* sos components */}
-            <Route path="/sos" element={<SOSMainPage />} />
-            <Route path="/police_services" element={<NearestPoliceStation />} />
-            <Route path="/alert_services" element={<SOSReport />} />
-            <Route path="/crime_cluster_service" element={<CrimeMap />} />
-            <Route path="/sos_data" element={<SOData />} />
-            <Route path="/contacts-police" element={<EmergencyContacts/>}/>
-            {/* about us */}
-            <Route path="/about" element={<AboutUs />} />
-            
-            {/* Default route fallback */}
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
-        </div>
-        <Footer />
-        <ChatWidget />
-      </div>
-    </>
+    <MainLayout>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/profile" element={<ProfileInterface />} />
+        <Route path="/create-profile" element={<NewUserForm />} />
+        
+        {/* statistics */}
+        <Route path="/statistics" element={<Statistics />} />
+        {/* fir register */}
+        <Route path="/FirRegister" element={<FirRegister />} />
+        <Route path="/lostItemReport" element={<LostReportForm />} />
+        <Route path="/MVTheftEfir" element={<MVTheftFIRForm />} />
+        <Route path="/MissingPersonform" element={<MissingPerson />} />
+        <Route path="/DomesticHelp&TenantRegistration" element={<DomesticTenantForm />} />
+        <Route path="/TheftEfir" element={<TheftEFIRForm />} />
+        <Route path="/CyberCrime" element={<CyberCrimeForm />} />
+        <Route path="/RapeCase" element={<RapeCaseForm />} />
+        {/* sos components */}
+        <Route path="/sos" element={<SOSMainPage />} />
+        <Route path="/police_services" element={<NearestPoliceStation />} />
+        <Route path="/alert_services" element={<SOSReport />} />
+        <Route path="/crime_cluster_service" element={<CrimeMap />} />
+        <Route path="/sos_data" element={<SOData />} />
+        <Route path="/contacts-police" element={<EmergencyContacts/>}/>
+        {/* about us */}
+        <Route path="/about" element={<AboutUs />} />
+        
+        {/* Default route fallback */}
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </MainLayout>
   );
 }
 
