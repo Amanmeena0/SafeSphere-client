@@ -7,6 +7,16 @@ import L from "leaflet";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
+import { motion } from "framer-motion";
+import { 
+  Map as MapIcon, 
+  Search, 
+  Filter, 
+  Table as TableIcon, 
+  Calendar, 
+  Activity,
+  ChevronDown
+} from "lucide-react";
 
 // Fix marker icon
 delete L.Icon.Default.prototype._getIconUrl;
@@ -15,6 +25,16 @@ L.Icon.Default.mergeOptions({
   iconUrl: markerIcon,
   shadowUrl: markerShadow,
 });
+
+const fadeUpVariant = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+};
 
 const CrimeMap = () => {
   const [crimeData, setCrimeData] = useState([]);
@@ -63,113 +83,109 @@ const CrimeMap = () => {
   }, [searchQuery, attackTypeFilter, cityFilter, stateFilter, yearFilter, crimeData]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-6">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#061224] py-16 px-6 lg:px-12 relative overflow-hidden">
+      {/* Background Glows */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-400/10 rounded-full blur-[120px] -z-10 mix-blend-multiply dark:mix-blend-screen"></div>
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-400/10 rounded-full blur-[120px] -z-10 mix-blend-multiply dark:mix-blend-screen"></div>
+
       <div className="max-w-[1440px] mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-5xl font-extrabold mb-3 bg-gradient-to-r from-blue-600 via-purple-600 to-red-600 bg-clip-text text-transparent">
-            🗺️ Crime Map & Analytics Dashboard
-          </h1>
-          <p className="text-lg text-gray-600 font-medium">Explore crime data patterns with interactive mapping and advanced filtering</p>
-        </div>
+        {/* Header Section */}
+        <motion.div 
+          initial="hidden"
+          animate="visible"
+          variants={staggerContainer}
+          className="text-center mb-16"
+        >
+          <motion.div variants={fadeUpVariant} className="mb-6 inline-flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-semibold border border-blue-200 dark:border-blue-800 shadow-sm">
+            <Activity className="w-4 h-4" />
+            <span>Real-time Analytical Intelligence</span>
+          </motion.div>
+          
+          <motion.h1 variants={fadeUpVariant} className="text-4xl lg:text-6xl font-extrabold text-slate-900 dark:text-white mb-6 tracking-tight">
+            Crime Map & <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Analytics Dashboard</span>
+          </motion.h1>
+          
+          <motion.p variants={fadeUpVariant} className="text-lg lg:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
+            Explore and analyze crime patterns through interactive spatial mapping and advanced data filtering.
+          </motion.p>
+        </motion.div>
 
         {/* Search Input */}
-        <div className="relative mb-8">
-          <div className="relative">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="relative mb-8 max-w-3xl mx-auto"
+        >
+          <div className="relative group">
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="🔍 Search by attack type, city, state, or summary..."
-              className="w-full p-4 pl-12 pr-4 text-gray-800 bg-white/80 backdrop-blur-sm border-2 border-transparent rounded-2xl shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-300 hover:shadow-xl"
+              placeholder="Search by attack type, city, state, or summary..."
+              className="w-full p-5 pl-14 pr-6 text-slate-800 dark:text-white bg-white dark:bg-slate-800/50 backdrop-blur-md border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300"
             />
-            <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+            <div className="absolute left-5 top-1/2 transform -translate-y-1/2 text-slate-400 group-hover:text-blue-500 transition-colors">
+              <Search className="w-6 h-6" />
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Filters */}
-        <div className="mb-8">
-          <h3 className="text-xl font-semibold text-gray-700 mb-4 flex items-center">
-            <svg className="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-            </svg>
-            Filter Options
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="mb-12 bg-white dark:bg-slate-800/40 p-8 rounded-3xl border border-slate-200 dark:border-slate-700/50 shadow-xl"
+        >
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
+            <Filter className="w-5 h-5 text-blue-500" />
+            Advanced Filter Options
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="group">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Attack Type</label>
-              <select
-                className="w-full p-3 bg-white/80 backdrop-blur-sm border-2 border-gray-200 rounded-xl shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-300 hover:shadow-xl group-hover:border-blue-300"
-                value={attackTypeFilter}
-                onChange={(e) => setAttackTypeFilter(e.target.value)}
-              >
-                <option value="">All Attack Types</option>
-                {getUniqueValues("attack type").map((val, i) => (
-                  <option key={i} value={val}>{val}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="group">
-              <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
-              <select
-                className="w-full p-3 bg-white/80 backdrop-blur-sm border-2 border-gray-200 rounded-xl shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-300 hover:shadow-xl group-hover:border-blue-300"
-                value={cityFilter}
-                onChange={(e) => setCityFilter(e.target.value)}
-              >
-                <option value="">All Cities</option>
-                {getUniqueValues("city").map((val, i) => (
-                  <option key={i} value={val}>{val}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="group">
-              <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
-              <select
-                className="w-full p-3 bg-white/80 backdrop-blur-sm border-2 border-gray-200 rounded-xl shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-300 hover:shadow-xl group-hover:border-blue-300"
-                value={stateFilter}
-                onChange={(e) => setStateFilter(e.target.value)}
-              >
-                <option value="">All States</option>
-                {getUniqueValues("state").map((val, i) => (
-                  <option key={i} value={val}>{val}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="group">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Year</label>
-              <select
-                className="w-full p-3 bg-white/80 backdrop-blur-sm border-2 border-gray-200 rounded-xl shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-300 hover:shadow-xl group-hover:border-blue-300"
-                value={yearFilter}
-                onChange={(e) => setYearFilter(e.target.value)}
-              >
-                <option value="">All Years</option>
-                {getUniqueValues("year").map((val, i) => (
-                  <option key={i} value={val}>{val}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-          {/* Map Section */}
-          <div className="group">
-            <div className="flex items-center mb-4">
-              <div className="p-2 bg-blue-500 rounded-lg mr-3">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { label: 'Attack Type', value: attackTypeFilter, setter: setAttackTypeFilter, key: 'attack type' },
+              { label: 'City', value: cityFilter, setter: setCityFilter, key: 'city' },
+              { label: 'State', value: stateFilter, setter: setStateFilter, key: 'state' },
+              { label: 'Year', value: yearFilter, setter: setYearFilter, key: 'year' },
+            ].map((f) => (
+              <div key={f.label} className="space-y-2">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">{f.label}</label>
+                <div className="relative">
+                  <select
+                    className="w-full p-3.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold dark:text-white appearance-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                    value={f.value}
+                    onChange={(e) => f.setter(e.target.value)}
+                  >
+                    <option value="">All {f.label}s</option>
+                    {getUniqueValues(f.key).map((val, i) => (
+                      <option key={i} value={val}>{val}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                </div>
               </div>
-              <h2 className="text-2xl font-bold text-gray-800">Interactive Crime Map</h2>
+            ))}
+          </div>
+        </motion.div>
+
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
+          {/* Map Section */}
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.5 }}
+            className="flex flex-col h-full"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-blue-600 rounded-xl text-white shadow-lg shadow-blue-500/20">
+                  <MapIcon className="w-6 h-6" />
+                </div>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Interactive Map</h2>
+              </div>
             </div>
-            <div className="h-[600px] rounded-2xl border-2 border-gray-200 shadow-2xl overflow-hidden bg-white/50 backdrop-blur-sm group-hover:shadow-3xl transition-all duration-300">
+            <div className="flex-grow min-h-[600px] rounded-[2.5rem] border border-slate-200 dark:border-slate-700/50 shadow-2xl overflow-hidden bg-white/50 dark:bg-slate-800/20 backdrop-blur-sm relative z-0">
               <MapContainer
                 center={[20.5937, 78.9629]}
                 zoom={4.2}
@@ -184,13 +200,20 @@ const CrimeMap = () => {
                   item.Latitude && item.Longitude ? (
                     <Marker key={idx} position={[item.Latitude, item.Longitude]}>
                       <Popup>
-                        <div className="p-2 min-w-[200px]">
-                          <div className="text-lg font-bold text-red-600 mb-2">{item["attack type"]}</div>
-                          <div className="text-sm text-gray-700 mb-1">
-                            <span className="font-semibold">📍 Location:</span> {item.city}, {item.state}
-                          </div>
-                          <div className="text-sm text-gray-600 mt-2 p-2 bg-gray-50 rounded">
-                            <span className="font-semibold">📝 Summary:</span> {item.summary}
+                        <div className="p-3 min-w-[220px] font-sans">
+                          <div className="text-base font-bold text-red-600 mb-2 border-b pb-2">{item["attack type"]}</div>
+                          <div className="space-y-2">
+                            <div className="text-sm text-slate-700 flex items-center gap-2">
+                              <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                              <span className="font-semibold text-slate-900">{item.city}, {item.state}</span>
+                            </div>
+                            <div className="text-sm text-slate-700 flex items-center gap-2">
+                              <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                              <span className="font-medium">{item.year}</span>
+                            </div>
+                            <div className="text-xs text-slate-500 mt-2 p-2 bg-slate-50 rounded-lg italic leading-relaxed">
+                              {item.summary}
+                            </div>
                           </div>
                         </div>
                       </Popup>
@@ -199,66 +222,55 @@ const CrimeMap = () => {
                 )}
               </MapContainer>
             </div>
-          </div>
+          </motion.div>
 
           {/* Table Section */}
-          <div className="group">
-            <div className="flex items-center mb-4">
-              <div className="p-2 bg-purple-500 rounded-lg mr-3">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.6 }}
+            className="flex flex-col h-full"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-indigo-600 rounded-xl text-white shadow-lg shadow-indigo-500/20">
+                  <TableIcon className="w-6 h-6" />
+                </div>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Intelligence Ledger</h2>
               </div>
-              <h2 className="text-2xl font-bold text-gray-800">Crime Data Table</h2>
-              <div className="ml-auto bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 rounded-full text-sm font-semibold">
-                {filteredData.length} Records
+              <div className="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-5 py-2 rounded-full text-sm font-bold border border-indigo-100 dark:border-indigo-800 shadow-sm">
+                {filteredData.length} Records Detected
               </div>
             </div>
-            <div className="overflow-hidden rounded-2xl border-2 border-gray-200 shadow-2xl bg-white/80 backdrop-blur-sm group-hover:shadow-3xl transition-all duration-300">
-              <div className="overflow-auto max-h-[600px] scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-gray-100">
+            
+            <div className="flex-grow overflow-hidden rounded-[2.5rem] border border-slate-200 dark:border-slate-700/50 shadow-2xl bg-white/80 dark:bg-slate-800/40 backdrop-blur-sm">
+              <div className="overflow-auto max-h-[600px] scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent">
                 <table className="w-full table-auto border-collapse text-sm">
-                  <thead className="bg-gradient-to-r from-blue-600 to-purple-600 text-white sticky top-0 z-10">
+                  <thead className="bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 sticky top-0 z-10">
                     <tr>
-                      <th className="p-4 text-left font-semibold">
-                        <div className="flex items-center">
-                          🚨 Attack Type
-                        </div>
-                      </th>
-                      <th className="p-4 text-left font-semibold">
-                        <div className="flex items-center">
-                          🏙️ City
-                        </div>
-                      </th>
-                      <th className="p-4 text-left font-semibold">
-                        <div className="flex items-center">
-                          📍 State
-                        </div>
-                      </th>
-                      <th className="p-4 text-left font-semibold">
-                        <div className="flex items-center">
-                          📅 Date
-                        </div>
-                      </th>
-                      <th className="p-4 text-left font-semibold">
-                        <div className="flex items-center">
-                          📄 Summary
-                        </div>
-                      </th>
+                      <th className="p-5 text-left font-bold uppercase tracking-wider text-xs">Attack Type</th>
+                      <th className="p-5 text-left font-bold uppercase tracking-wider text-xs">Location</th>
+                      <th className="p-5 text-left font-bold uppercase tracking-wider text-xs">Date</th>
+                      <th className="p-5 text-left font-bold uppercase tracking-wider text-xs">Intelligence</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
                     {filteredData.map((item, idx) => (
-                      <tr key={idx} className="hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 even:bg-gray-50/50 transition-all duration-200 border-b border-gray-100">
-                        <td className="p-4 border-r border-gray-100">
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 border border-red-200">
+                      <tr key={idx} className="hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-colors">
+                        <td className="p-5">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800">
                             {item["attack type"]}
                           </span>
                         </td>
-                        <td className="p-4 border-r border-gray-100 font-medium text-gray-700">{item.city}</td>
-                        <td className="p-4 border-r border-gray-100 font-medium text-gray-700">{item.state}</td>
-                        <td className="p-4 border-r border-gray-100 text-gray-600">{`${item.day || ""} ${item.month || ""} ${item.year || ""}`}</td>
-                        <td className="p-4">
-                          <div className="max-w-xs truncate text-gray-600" title={item.summary}>
+                        <td className="p-5">
+                          <div className="font-bold text-slate-900 dark:text-slate-200 leading-tight">{item.city}</div>
+                          <div className="text-xs text-slate-500 font-medium">{item.state}</div>
+                        </td>
+                        <td className="p-5 text-slate-600 dark:text-slate-400 font-bold whitespace-nowrap">
+                          {`${item.day || ""} ${item.month || ""} ${item.year || ""}`}
+                        </td>
+                        <td className="p-5">
+                          <div className="max-w-[180px] truncate text-slate-500 dark:text-slate-400 font-medium italic" title={item.summary}>
                             {item.summary}
                           </div>
                         </td>
@@ -268,16 +280,22 @@ const CrimeMap = () => {
                 </table>
 
                 {filteredData.length === 0 && (
-                  <div className="p-8 text-center bg-gradient-to-r from-red-50 to-pink-50 m-4 rounded-xl border-2 border-red-200">
-                    <div className="text-6xl mb-4">🚫</div>
-                    <div className="text-xl font-bold text-red-600 mb-2">No matching records found</div>
-                    <div className="text-gray-600">Try adjusting your search criteria or filters</div>
+                  <div className="p-16 text-center">
+                    <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl">
+                      🔍
+                    </div>
+                    <div className="text-xl font-bold text-slate-900 dark:text-white mb-2">No intelligence found</div>
+                    <div className="text-slate-500 font-medium">Try adjusting your filtration criteria</div>
                   </div>
                 )}
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
+        
+        <footer className="mt-20 text-center text-sm font-medium text-slate-400 italic">
+          &copy; {new Date().getFullYear()} SafeSphere Global Intelligence Network • Data Updated Hourly
+        </footer>
       </div>
     </div>
   );

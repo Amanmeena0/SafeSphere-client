@@ -1,9 +1,21 @@
-import "./NearestPoliceMap.css"; // Add this line at the top    
+import "./NearestPoliceMap.css";   
 import { useRef, useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import PropTypes from "prop-types";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Building2, 
+  Search, 
+  Navigation, 
+  Map as MapIcon, 
+  Phone, 
+  ShieldCheck,
+  ChevronRight,
+  Info
+} from "lucide-react";
+import backend from "@/config";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -14,6 +26,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl:
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.3.4/images/marker-shadow.png",
 });
+
 const MapViewUpdater = ({ position, zoom }) => {
   const map = useMap();
   useEffect(() => {
@@ -27,93 +40,97 @@ MapViewUpdater.propTypes = {
   zoom: PropTypes.number.isRequired,
 };
 
+const fadeUpVariant = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+};
+
 export default function NearestPoliceMap() {
   const [searchInput, setSearchInput] = useState("");
   const [userPosition, setUserPosition] = useState(null);
   const [nearestStations, setNearestStations] = useState([]);
-  const [mapZoom, setMapZoom] = useState(6); // <-- Add zoom state
+  const [mapZoom, setMapZoom] = useState(6);
+  const [isSearching, setIsSearching] = useState(false);
 
   const mapRef = useRef();
 
-  // Add custom CSS for animations
-  const customStyles = `
-    <style>
-      @keyframes pulse {
-        0% { transform: scale(1); opacity: 1; }
-        50% { transform: scale(1.1); opacity: 0.7; }
-        100% { transform: scale(1); opacity: 1; }
+  // Custom animations for the map markers
+  useEffect(() => {
+    const customStyles = `
+      @keyframes pulse-ring {
+        0% { transform: scale(0.33); opacity: 1; }
+        80%, 100% { opacity: 0; }
       }
-      
-      .custom-user-marker div:first-child {
-        animation: pulse 2s infinite;
+      .custom-user-marker {
+        animation: pulse-ring 1.25s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
       }
-      
-      .custom-popup .leaflet-popup-content-wrapper {
-        border-radius: 12px !important;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
-      }
-      
-      .custom-popup .leaflet-popup-tip {
-        background: white !important;
-      }
-      
-      .leaflet-container {
-        border-radius: 0 0 16px 16px;
-      }
-    </style>
-  `;
-
-  // Insert custom styles
-  if (typeof document !== 'undefined') {
+    `;
     const styleElement = document.createElement('style');
-    styleElement.innerHTML = customStyles.replace(/<\/?style>/g, '');
-    if (!document.querySelector('[data-police-map-styles]')) {
-      styleElement.setAttribute('data-police-map-styles', 'true');
-      document.head.appendChild(styleElement);
-    }
-  }
+    styleElement.innerHTML = customStyles;
+    document.head.appendChild(styleElement);
+    return () => document.head.removeChild(styleElement);
+  }, []);
 
   const fetchNearestStations = async (lat, lon) => {
-    const res = await fetch(
-      `http://127.0.0.1:5000/sos/nearest-police-stations?lat=${lat}&lon=${lon}&top=3`
-    );
-    const data = await res.json();
-    setNearestStations(data);
+    setIsSearching(true);
+    try {
+      const res = await fetch(
+        `${backend.apiUrl}/sos/nearest-police-stations?lat=${lat}&lon=${lon}&top=3`
+      );
+      const data = await res.json();
+      setNearestStations(data);
+    } catch (error) {
+      console.error("Error fetching stations:", error);
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   const handleGeocodeSearch = async () => {
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-        searchInput
-      )}`
-    );
-    const data = await response.json();
-    if (data.length > 0) {
-      const lat = parseFloat(data[0].lat);
-      const lon = parseFloat(data[0].lon);
-      setUserPosition([lat, lon]);
-      setMapZoom(15); // <-- Zoom in on search
-      fetchNearestStations(lat, lon);
-    } else {
-      alert("Location not found. Please try again.");
+    if (!searchInput.trim()) return;
+    setIsSearching(true);
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          searchInput
+        )}`
+      );
+      const data = await response.json();
+      if (data.length > 0) {
+        const lat = parseFloat(data[0].lat);
+        const lon = parseFloat(data[0].lon);
+        setUserPosition([lat, lon]);
+        setMapZoom(15);
+        fetchNearestStations(lat, lon);
+      } else {
+        alert("Location not found. Please try again.");
+      }
+    } finally {
+      setIsSearching(false);
     }
   };
 
   const handleNearMe = () => {
+    setIsSearching(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude, longitude } = pos.coords;
         setUserPosition([latitude, longitude]);
-        setMapZoom(15); // <-- Zoom in on "Near Me"
+        setMapZoom(15);
         fetchNearestStations(latitude, longitude);
       },
       () => {
         alert("Location access denied or not available.");
+        setIsSearching(false);
       }
     );
   };
 
-  // Function to pan map to a station
   const panToStation = (coordinates) => {
     if (mapRef.current) {
       mapRef.current.setView(coordinates, 17); 
@@ -121,137 +138,175 @@ export default function NearestPoliceMap() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-6">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#061224] py-16 px-6 lg:px-12 relative overflow-hidden">
+      {/* Background Glows */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-teal-400/10 rounded-full blur-[120px] -z-10 mix-blend-multiply dark:mix-blend-screen"></div>
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-emerald-400/10 rounded-full blur-[120px] -z-10 mix-blend-multiply dark:mix-blend-screen"></div>
+
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
-        <div className="text-center mb-8">
-          <h1 className="text-5xl font-extrabold mb-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
-            🚔 Police Station Locator
-          </h1>
-          <p className="text-lg text-gray-600 font-medium">Find the nearest police stations in your area quickly and efficiently</p>
-        </div>
+        <motion.div 
+          initial="hidden"
+          animate="visible"
+          variants={staggerContainer}
+          className="text-center mb-16"
+        >
+          <motion.div variants={fadeUpVariant} className="mb-6 inline-flex items-center gap-2 px-4 py-2 bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 rounded-full text-sm font-semibold border border-teal-200 dark:border-teal-800 shadow-sm">
+            <Building2 className="w-4 h-4" />
+            <span>Precinct Locator Network</span>
+          </motion.div>
+          
+          <motion.h1 variants={fadeUpVariant} className="text-4xl lg:text-6xl font-extrabold text-slate-900 dark:text-white mb-6 tracking-tight">
+            Nearest Police <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-600">Station Locator</span>
+          </motion.h1>
+          
+          <motion.p variants={fadeUpVariant} className="text-lg lg:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
+            Quickly identify and navigate to the nearest law enforcement facilities for immediate assistance or reporting.
+          </motion.p>
+        </motion.div>
 
         {/* Search Controls */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-6 mb-8 border border-gray-200">
-          <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-            <svg className="w-6 h-6 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            Search Location
-          </h3>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1 relative">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="bg-white dark:bg-slate-800/40 backdrop-blur-md rounded-[2.5rem] shadow-2xl p-8 mb-12 border border-slate-200 dark:border-slate-700/50"
+        >
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1 relative group">
               <input
                 type="text"
-                placeholder="Enter location (e.g., Pune, Mumbai, Delhi)"
+                placeholder="Enter city, district, or landmark..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                className="w-full p-4 pl-12 pr-4 text-gray-800 bg-white border-2 border-gray-200 rounded-xl shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-300 hover:shadow-xl"
+                className="w-full p-4 pl-14 pr-6 text-slate-800 dark:text-white bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-2xl focus:outline-none focus:ring-4 focus:ring-teal-500/20 focus:border-teal-500 transition-all duration-300"
                 onKeyPress={(e) => e.key === 'Enter' && handleGeocodeSearch()}
               />
-              <svg className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-400 group-hover:text-teal-500 transition-colors" />
             </div>
             <div className="flex gap-3">
               <button 
                 onClick={handleGeocodeSearch}
-                className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-indigo-700 transform hover:scale-105 transition-all duration-300 flex items-center gap-2"
+                disabled={isSearching}
+                className="flex-1 md:flex-none px-8 py-4 bg-[#0B1F3A] dark:bg-teal-600 text-white font-bold rounded-2xl shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 group disabled:opacity-70"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                Search
+                Search <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
               <button
                 onClick={handleNearMe}
-                className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl hover:from-green-600 hover:to-emerald-600 transform hover:scale-105 transition-all duration-300 flex items-center gap-2"
+                disabled={isSearching}
+                className="px-8 py-4 bg-white dark:bg-slate-700 text-[#0B1F3A] dark:text-white border border-slate-200 dark:border-slate-600 font-bold rounded-2xl shadow-sm hover:shadow-md transition-all flex items-center gap-2 group disabled:opacity-70"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
+                <Navigation className="w-5 h-5 text-teal-600 group-hover:rotate-12 transition-transform" />
                 Near Me
               </button>
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Police Stations List */}
-        {nearestStations.length > 0 && (
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-6 mb-8 border border-gray-200">
-            <div className="flex items-center mb-6">
-              <div className="p-2 bg-red-500 rounded-lg mr-3">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
+          {/* List Section */}
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.4 }}
+            className="xl:col-span-1"
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2.5 bg-teal-600 rounded-xl text-white shadow-lg shadow-teal-500/20">
+                <Building2 className="w-6 h-6" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-800">Nearest Police Stations</h3>
-              <div className="ml-auto bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-full text-sm font-semibold">
-                {nearestStations.length} Found
-              </div>
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Nearby Precincts</h2>
             </div>
-            <div className="grid gap-4">
-              {nearestStations.map((station, index) => (
-                <div 
-                  key={station.name + station.district + station.state}
-                  className="group bg-gradient-to-r from-white to-gray-50 p-4 rounded-xl border-2 border-gray-200 hover:border-blue-400 hover:shadow-lg transition-all duration-300 cursor-pointer"
-                  onClick={() => panToStation(station.coordinates)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-full flex items-center justify-center font-bold text-lg mr-4">
-                        {index + 1}
-                      </div>
-                      <div>
-                        <h4 className="text-lg font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
-                          {station.name}
-                        </h4>
-                        <p className="text-gray-600 flex items-center">
-                          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
-                          {station.district}, {station.state}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
-                        {station.distance_km} km
-                      </div>
-                      <div className="text-xs text-gray-500 mt-1 group-hover:text-blue-500 transition-colors">
-                        Click to view on map
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
-        {/* Map Section */}
-        {userPosition ? (
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden border border-gray-200">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center">
-                <div className="p-2 bg-green-500 rounded-lg mr-3">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m0 0L9 7" />
-                  </svg>
-                </div>
-                <h3 className="text-2xl font-bold text-gray-800">Interactive Map</h3>
-                <div className="ml-auto text-sm text-gray-500">
-                  Click on stations to view details
-                </div>
+            <div className="space-y-4">
+              <AnimatePresence mode="popLayout">
+                {nearestStations.length > 0 ? (
+                  nearestStations.map((station, index) => (
+                    <motion.div 
+                      key={station.name + index}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      whileHover={{ x: 5 }}
+                      onClick={() => panToStation(station.coordinates)}
+                      className="group bg-white dark:bg-slate-800/40 p-6 rounded-3xl border border-slate-200 dark:border-slate-700/50 shadow-lg hover:border-teal-500/50 cursor-pointer transition-all duration-300"
+                    >
+                      <div className="flex justify-between items-start">
+                        <div className="flex gap-4">
+                          <div className="w-10 h-10 bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 rounded-full flex items-center justify-center font-black text-xs shrink-0">
+                            0{index + 1}
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-slate-900 dark:text-white group-hover:text-teal-600 transition-colors leading-tight mb-1">
+                              {station.name}
+                            </h4>
+                            <p className="text-xs text-slate-500 font-medium flex items-center gap-1">
+                              <MapIcon className="w-3 h-3" />
+                              {station.district}, {station.state}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase">
+                            {station.distance_km} KM
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))
+                ) : (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="p-12 text-center bg-white dark:bg-slate-800/20 rounded-[2.5rem] border border-dashed border-slate-300 dark:border-slate-700"
+                  >
+                    <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                      🔍
+                    </div>
+                    <p className="text-slate-500 font-medium text-sm">
+                      {isSearching ? "Identifying nearby units..." : "Search for a location to view results"}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+            
+            <div className="mt-8 p-6 bg-blue-50 dark:bg-blue-900/10 rounded-3xl border border-blue-100 dark:border-blue-800/30">
+              <div className="flex gap-3">
+                <Info className="w-5 h-5 text-blue-600 shrink-0" />
+                <p className="text-xs text-blue-700 dark:text-blue-400 font-medium leading-relaxed">
+                  In case of immediate threat to life, please dial <span className="font-bold underline">100</span> directly rather than navigating.
+                </p>
               </div>
             </div>
-            <div className="h-[600px]">
+          </motion.div>
+
+          {/* Map Section */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.5 }}
+            className="xl:col-span-2 h-full flex flex-col"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-emerald-600 rounded-xl text-white shadow-lg shadow-emerald-500/20">
+                  <Navigation className="w-6 h-6" />
+                </div>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Interactive Map</h2>
+              </div>
+              {userPosition && (
+                <div className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-5 py-2 rounded-full text-sm font-bold border border-emerald-100 dark:border-emerald-800 shadow-sm flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4" />
+                  Live Sync
+                </div>
+              )}
+            </div>
+
+            <div className="flex-grow min-h-[500px] xl:min-h-0 rounded-[2.5rem] border border-slate-200 dark:border-slate-700/50 shadow-2xl overflow-hidden bg-white/50 dark:bg-slate-800/20 backdrop-blur-sm relative z-0">
               <MapContainer
-                center={userPosition}
-                zoom={mapZoom}
+                center={userPosition || [20.5937, 78.9629]}
+                zoom={userPosition ? mapZoom : 5}
                 className="w-full h-full"
                 whenCreated={(mapInstance) => {
                   mapRef.current = mapInstance;
@@ -261,117 +316,47 @@ export default function NearestPoliceMap() {
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   attribution="&copy; OpenStreetMap contributors"
                 />
-                <MapViewUpdater position={userPosition} zoom={mapZoom} />
+                {userPosition && <MapViewUpdater position={userPosition} zoom={mapZoom} />}
 
-                {/* Enhanced User Location Marker */}
-                <Marker
-                  position={userPosition}
-                  icon={L.divIcon({
-                    className: "custom-user-marker",
-                    html: `
-                      <div style="text-align: center; transform: translate(-50%, -100%);">
-                        <div style="
-                          background: linear-gradient(135deg, #3B82F6, #1D4ED8);
-                          border: 3px solid white;
-                          border-radius: 50%;
-                          width: 24px;
-                          height: 24px;
-                          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-                          animation: pulse 2s infinite;
-                        "></div>
-                        <div style="
-                          background: linear-gradient(135deg, #3B82F6, #1D4ED8);
-                          color: white;
-                          padding: 6px 12px;
-                          border-radius: 12px;
-                          font-size: 12px;
-                          font-weight: bold;
-                          margin-top: 4px;
-                          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-                          white-space: nowrap;
-                        ">
-                          📍 Your Location
-                        </div>
-                      </div>
-                    `,
-                    iconSize: [80, 60],
-                    iconAnchor: [40, 60],
-                  })}
-                >
-                  <Popup className="custom-popup">
-                    <div style={{textAlign: 'center', padding: '8px'}}>
-                      <div style={{fontWeight: 'bold', color: '#3B82F6', marginBottom: '4px'}}>🏠 Your Current Location</div>
-                      <div style={{color: '#6B7280', fontSize: '12px'}}>This is where you are right now</div>
-                    </div>
-                  </Popup>
-                </Marker>
-
-                {/* Enhanced Police Station Markers */}
-                {nearestStations.map((station, index) => (
+                {userPosition && (
                   <Marker
-                    key={station.name + station.district + station.state}
-                    position={station.coordinates}
+                    position={userPosition}
                     icon={L.divIcon({
-                      className: "custom-police-marker",
+                      className: "custom-user-marker",
                       html: `
-                        <div style="text-align: center; transform: translate(-50%, -100%);">
-                          <div style="
-                            background: linear-gradient(135deg, #EF4444, #DC2626);
-                            border: 3px solid white;
-                            border-radius: 50%;
-                            width: 20px;
-                            height: 20px;
-                            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            color: white;
-                            font-size: 10px;
-                            font-weight: bold;
-                          ">${index + 1}</div>
-                          <div style="
-                            background: linear-gradient(135deg, #EF4444, #DC2626);
-                            color: white;
-                            padding: 4px 8px;
-                            border-radius: 8px;
-                            font-size: 10px;
-                            font-weight: bold;
-                            margin-top: 4px;
-                            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-                            white-space: nowrap;
-                            max-width: 120px;
-                            overflow: hidden;
-                            text-overflow: ellipsis;
-                          ">
-                            🚔 ${station.name.length > 15 ? station.name.substring(0, 15) + '...' : station.name}
-                          </div>
-                        </div>
+                        <div style="background: #3B82F6; border: 4px solid white; border-radius: 50%; width: 20px; height: 20px; box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);"></div>
                       `,
-                      iconSize: [100, 50],
-                      iconAnchor: [50, 50],
+                      iconSize: [20, 20],
+                      iconAnchor: [10, 10],
                     })}
                   >
-                    <Popup className="custom-popup">
-                      <div style={{padding: '12px', minWidth: '200px'}}>
-                        <div style={{fontWeight: 'bold', color: '#EF4444', marginBottom: '8px', fontSize: '16px'}}>
-                          🚔 {station.name}
+                    <Popup>
+                      <div className="p-2 font-bold text-blue-600">You are here</div>
+                    </Popup>
+                  </Marker>
+                )}
+
+                {nearestStations.map((station, index) => (
+                  <Marker
+                    key={station.name + index}
+                    position={station.coordinates}
+                    icon={L.divIcon({
+                      html: `
+                        <div style="background: #EF4444; border: 3px solid white; border-radius: 50%; width: 16px; height: 16px; box-shadow: 0 0 15px rgba(239, 68, 68, 0.6); display: flex; align-items: center; justify-content: center; color: white; font-size: 8px; font-weight: bold;">
+                          ${index + 1}
                         </div>
-                        <div style={{color: '#6B7280', marginBottom: '4px'}}>
-                          <strong>📍 Location:</strong> {station.district}, {station.state}
-                        </div>
-                        <div style={{color: '#6B7280', marginBottom: '8px'}}>
-                          <strong>📏 Distance:</strong> {station.distance_km} km away
-                        </div>
-                        <div style={{
-                          background: 'linear-gradient(135deg, #10B981, #059669)',
-                          color: 'white',
-                          padding: '6px 12px',
-                          borderRadius: '6px',
-                          textAlign: 'center',
-                          fontWeight: 'bold',
-                          fontSize: '12px'
-                        }}>
-                          Emergency Contact Available
+                      `,
+                      iconSize: [16, 16],
+                      iconAnchor: [8, 8],
+                    })}
+                  >
+                    <Popup>
+                      <div className="p-3 min-w-[180px]">
+                        <div className="font-bold text-red-600 mb-1">🚔 {station.name}</div>
+                        <div className="text-xs text-slate-500 mb-2">{station.district}, {station.state}</div>
+                        <div className="flex items-center gap-2 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full w-fit">
+                          <Navigation className="w-2.5 h-2.5" />
+                          {station.distance_km} KM AWAY
                         </div>
                       </div>
                     </Popup>
@@ -379,28 +364,8 @@ export default function NearestPoliceMap() {
                 ))}
               </MapContainer>
             </div>
-          </div>
-        ) : (
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-12 text-center border border-gray-200">
-            <div className="max-w-md mx-auto">
-              <div className="w-24 h-24 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-800 mb-3">Ready to Help You</h3>
-              <p className="text-gray-600 mb-6">
-                Search for a location or use &quot;Near Me&quot; to find the closest police stations in your area.
-              </p>
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                <p className="text-blue-700 text-sm font-medium">
-                  💡 Tip: Allow location access for more accurate results when using &quot;Near Me&quot;
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
+          </motion.div>
+        </div>
       </div>
     </div>
   );
