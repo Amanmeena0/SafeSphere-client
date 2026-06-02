@@ -1,13 +1,15 @@
 import { Link, useLocation } from 'react-router-dom';
 import { SignedOut, SignedIn, UserButton, SignInButton, SignUpButton } from '@clerk/clerk-react';
-import { Shield, Menu, X, ArrowRight, Bell, FileText } from 'lucide-react';
+import { Shield, Menu, X, ArrowRight, Bell, FileText, Sun, Moon } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '../../../hooks/useTheme';
 
 const Navbar = () => {
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -60,6 +62,14 @@ const Navbar = () => {
         
         {/* User Profile / Auth Area */}
         <div className="flex items-center gap-3">
+          <button 
+            onClick={toggleTheme}
+            className="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
+            title={theme === 'dark' ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          >
+            {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </button>
+          
           <SignedOut>
             <div className="hidden md:flex items-center gap-4">
               <SignInButton mode="modal">
