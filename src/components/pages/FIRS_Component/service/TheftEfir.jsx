@@ -31,6 +31,7 @@ export default function TheftEFIRForm() {
 
     try {
       let base64File = "";
+      // The file input name is "files" in the JSX below
       if (formData.files) {
         try {
           base64File = await fileToBase64(formData.files);
@@ -61,7 +62,7 @@ export default function TheftEFIRForm() {
       console.error("Submission error:", error);
       setStatus({ 
         type: "error", 
-        message: error.response?.data?.message || "Failed to submit FIR. Please try again." 
+        message: error.response?.data?.error || error.response?.data?.message || "Failed to submit FIR. Please try again." 
       });
     } finally {
       setLoading(false);
@@ -116,6 +117,7 @@ export default function TheftEFIRForm() {
                     placeholder="Please provide detailed information about what was stolen and from where..."
                     className="w-full p-4 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-300 resize-none"
                     rows="4"
+                    value={formData.incidentDetails || ""}
                     onChange={handleChange}
                     required
                   ></textarea>
@@ -136,6 +138,7 @@ export default function TheftEFIRForm() {
                     <input
                       type="date"
                       name="date"
+                      value={formData.date || ""}
                       className="w-full p-4 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300"
                       onChange={handleChange}
                       required
@@ -146,6 +149,7 @@ export default function TheftEFIRForm() {
                     <input
                       type="time"
                       name="time"
+                      value={formData.time || ""}
                       className="w-full p-4 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-300"
                       onChange={handleChange}
                       required
@@ -169,6 +173,7 @@ export default function TheftEFIRForm() {
                     <input
                       type="number"
                       name="estimatedLoss"
+                      value={formData.estimatedLoss || ""}
                       className="w-full pl-10 pr-4 py-4 border-2 border-gray-200 rounded-lg focus:border-red-500 focus:ring-2 focus:ring-red-200 transition-all duration-300"
                       onChange={handleChange}
                       placeholder="Enter estimated loss amount"
@@ -192,6 +197,7 @@ export default function TheftEFIRForm() {
                     <input
                       type="text"
                       name="witnessInfo"
+                      value={formData.witnessInfo || ""}
                       className="w-full p-4 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300"
                       placeholder="Name and contact details of any witnesses"
                       onChange={handleChange}
@@ -201,6 +207,7 @@ export default function TheftEFIRForm() {
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Complainant Details</label>
                     <textarea
                       name="complainantDetails"
+                      value={formData.complainantDetails || ""}
                       className="w-full p-4 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-300 resize-none"
                       rows="3"
                       placeholder="Your full name, contact number, and complete address"
@@ -221,22 +228,38 @@ export default function TheftEFIRForm() {
                 </h3>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Upload Supporting Files</label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-yellow-500 transition-colors duration-300">
-                    <svg className="w-10 h-10 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
-                    <input
-                      type="file"
-                      name="files"
-                      accept="image/*,application/pdf"
-                      className="hidden"
-                      id="file-upload"
-                      onChange={handleChange}
-                    />
-                    <label htmlFor="file-upload" className="cursor-pointer">
-                      <span className="text-yellow-600 font-semibold hover:text-yellow-700">Click to upload files</span>
-                      <p className="text-gray-500 text-sm mt-1">Images, PDFs up to 10MB</p>
-                    </label>
+                  <div className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors duration-300 ${formData.files ? 'border-yellow-500 bg-yellow-50' : 'border-gray-300 hover:border-yellow-500'}`}>
+                    {formData.files ? (
+                      <div className="flex flex-col items-center">
+                        <CheckCircle2 className="w-10 h-10 text-yellow-600 mb-2" />
+                        <span className="text-yellow-800 font-semibold">{formData.files.name}</span>
+                        <button 
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, files: null }))}
+                          className="mt-2 text-sm text-red-600 hover:text-red-700 font-medium"
+                        >
+                          Remove file
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <svg className="w-10 h-10 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <input
+                          type="file"
+                          name="files"
+                          accept="image/*,application/pdf"
+                          className="hidden"
+                          id="file-upload"
+                          onChange={handleChange}
+                        />
+                        <label htmlFor="file-upload" className="cursor-pointer">
+                          <span className="text-yellow-600 font-semibold hover:text-yellow-700">Click to upload files</span>
+                          <p className="text-gray-500 text-sm mt-1">Images, PDFs up to 10MB</p>
+                        </label>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -255,6 +278,7 @@ export default function TheftEFIRForm() {
                     <input
                       type="text"
                       name="policeStation"
+                      value={formData.policeStation || ""}
                       className="w-full p-4 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300"
                       placeholder="Enter the police station name"
                       onChange={handleChange}
@@ -270,6 +294,7 @@ export default function TheftEFIRForm() {
                       <input
                         type="text"
                         name="captcha"
+                        value={formData.captcha || ""}
                         placeholder="Enter the code shown"
                         className="flex-1 p-4 border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300"
                         onChange={handleChange}
