@@ -22,7 +22,7 @@ export default function CyberCrimeForm() {
 
     try {
       const submissionData = { ...formData, fir_type: 'cyber_crime' };
-      const response = await apiClient.post("/api/firs/submit", submissionData);
+      const response = await apiClient.post("api/firs/cyber-crime/", submissionData);
 
       if (response.status === 200 || response.status === 201) {
         setStatus({ type: "success", message: "Cyber Crime report submitted successfully. Investigation ID generated." });

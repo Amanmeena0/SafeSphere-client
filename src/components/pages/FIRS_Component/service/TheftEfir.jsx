@@ -15,16 +15,42 @@ export default function TheftEFIRForm() {
     }));
   };
 
+  const fileToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setStatus({ type: null, message: "" });
 
     try {
-      // Create a copy of the form data
-      const submissionData = { ...formData, fir_type: 'theft' };
-      
-      const response = await apiClient.post("/api/firs/submit", submissionData);
+      let base64File = "";
+      if (formData.files) {
+        try {
+          base64File = await fileToBase64(formData.files);
+        } catch (err) {
+          console.error("File conversion error:", err);
+        }
+      }
+
+      // Map frontend fields to backend expected keys
+      const submissionData = {
+        incident_description: formData.incidentDetails || "",
+        date_of_theft: formData.date || "",
+        financial_impact: formData.estimatedLoss || "",
+        witness_information: formData.witnessInfo || "",
+        complainant_details: formData.complainantDetails || "",
+        upload_documents: base64File,
+        police_station: formData.policeStation || "",
+      };
+
+      const response = await apiClient.post("/api/firs/theft", submissionData);
 
       if (response.status === 200 || response.status === 201) {
         setStatus({ type: "success", message: "Theft E-FIR submitted successfully. You can track its status in 'My Reports'." });
