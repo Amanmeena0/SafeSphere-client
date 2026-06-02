@@ -51,7 +51,7 @@ const EnhancedStatisticalDashboard = () => {
     });
 
     const calculateStatistics = useCallback(() => {
-        const totalCrimes = data.reduce((sum, item) => sum + (item.total_ipc_crimes || 0), 0);
+        const totalCrimes = data.reduce((sum, item) => sum + (Number(item.total_ipc_crimes) || 0), 0);
         
         const crimeTypes = {};
         const states = {};
@@ -60,11 +60,11 @@ const EnhancedStatisticalDashboard = () => {
         data.forEach(item => {
             Object.keys(item).forEach(key => {
                 if (key.includes('murder') || key.includes('rape') || key.includes('theft')) {
-                    crimeTypes[key] = (crimeTypes[key] || 0) + (item[key] || 0);
+                    crimeTypes[key] = (crimeTypes[key] || 0) + (Number(item[key]) || 0);
                 }
             });
-            states[item.state_ut] = (states[item.state_ut] || 0) + (item.total_ipc_crimes || 0);
-            years[item.year] = (years[item.year] || 0) + (item.total_ipc_crimes || 0);
+            states[item.state_ut] = (states[item.state_ut] || 0) + (Number(item.total_ipc_crimes) || 0);
+            years[item.year] = (years[item.year] || 0) + (Number(item.total_ipc_crimes) || 0);
         });
 
         const mostCommonCrime = Object.entries(crimeTypes).reduce((a, b) => (a[1] || 0) > (b[1] || 0) ? a : b, ['', 0])?.[0] || '';

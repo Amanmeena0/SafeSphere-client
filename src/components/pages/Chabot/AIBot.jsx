@@ -1,6 +1,17 @@
 import { useState, useRef, useEffect } from "react";
 import apiClient from "@/lib/apiClient";
 import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Send, 
+  X, 
+  Bot, 
+  User, 
+  Loader2, 
+  Trash2, 
+  Copy, 
+  Check, 
+  Info
+} from "lucide-react";
 
 export default function Chatbot({ onClose }) {
   const [messages, setMessages] = useState([

@@ -25,9 +25,10 @@ export const setupInterceptors = (getToken, signOut) => {
     (response) => response,
     async (error) => {
       if (error.response?.status === 401) {
-        console.warn('Unauthorized access detected, signing out...');
-        if (signOut) await signOut();
-        window.location.href = '/';
+        console.warn('Unauthorized (401) response from backend. Verify JWT validation on Flask.');
+        // Temporarily disabled redirect to help user debug backend connection
+        // if (signOut) await signOut();
+        // window.location.href = '/';
       }
       return Promise.reject(error);
     }

@@ -19,6 +19,7 @@ export default function MyReports() {
   useEffect(() => {
     apiClient.get("/api/profile/my-firs")
       .then(res => {
+        console.log("My Reports API Response:", res.data);
         // Ensure data is an array
         const data = Array.isArray(res.data) ? res.data : [];
         setReports(data);
