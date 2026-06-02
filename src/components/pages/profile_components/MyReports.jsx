@@ -19,12 +19,15 @@ export default function MyReports() {
   useEffect(() => {
     apiClient.get("/api/profile/my-firs")
       .then(res => {
-        setReports(res.data);
+        // Ensure data is an array
+        const data = Array.isArray(res.data) ? res.data : [];
+        setReports(data);
         setLoading(false);
       })
       .catch(err => {
         console.error("Failed to fetch reports", err);
         setError("Failed to load your reports. Please try again later.");
+        setReports([]); // Ensure it's still an array
         setLoading(false);
       });
   }, []);

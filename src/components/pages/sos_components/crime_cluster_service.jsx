@@ -50,10 +50,15 @@ const CrimeMap = () => {
   useEffect(() => {
     apiClient.get('/api/crime-data')
       .then((res) => {
-        setCrimeData(res.data);
-        setFilteredData(res.data);
+        const data = Array.isArray(res.data) ? res.data : [];
+        setCrimeData(data);
+        setFilteredData(data);
       })
-      .catch((err) => console.error("Error fetching data:", err));
+      .catch((err) => {
+        console.error("Error fetching data:", err);
+        setCrimeData([]);
+        setFilteredData([]);
+      });
   }, []);
 
   // Extract unique values for dropdowns
