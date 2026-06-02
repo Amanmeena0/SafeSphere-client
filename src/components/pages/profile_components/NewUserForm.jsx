@@ -2,10 +2,10 @@
 import { useState } from 'react';
 import { useUser } from '../../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import backend from '@/config';
+import apiClient from '@/lib/apiClient';
 
 export default function NewUserForm() {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: user?.firstName + ' ' + user?.lastName || '',
@@ -37,42 +37,25 @@ export default function NewUserForm() {
     setError('');
 
     try {
-      const response = await fetch(`${backend.apiUrl}/profile/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...formData,
-          authId: user?.id,
-          email: user?.primaryEmailAddress?.emailAddress
-        }),
-      });
+      const response = await apiClient.post('/profile/register', formData);
 
-      const text = await response.text();
-      let data = {};
-      try {
-        data = JSON.parse(text);
-      } catch {
-        data = { message: text };
-      }
-
-      if (response.ok) {
+      if (response.status === 200 || response.status === 201) {
         setMessage('Profile created successfully!');
-
         setTimeout(() => {
           navigate('/profile');
         }, 1500);
       } else {
-        setError(data.message || 'Failed to create profile');
+        setError(response.data?.message || 'Failed to create profile');
       }
     } catch (error) {
-      setError('Network error. Please try again.');
+      setError(error.response?.data?.message || 'Network error. Please try again.');
       console.error('Error:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  if (!isLoaded) return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">

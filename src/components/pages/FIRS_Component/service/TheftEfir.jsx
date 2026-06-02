@@ -1,7 +1,11 @@
 import { useState } from "react";
+import apiClient from "@/lib/apiClient";
+import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 
 export default function TheftEFIRForm() {
   const [formData, setFormData] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState({ type: null, message: "" });
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -11,10 +15,31 @@ export default function TheftEFIRForm() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
-    alert("Theft E FIR submitted successfully.");
+    setLoading(true);
+    setStatus({ type: null, message: "" });
+
+    try {
+      // Create a copy of the form data
+      const submissionData = { ...formData, fir_type: 'theft' };
+      
+      const response = await apiClient.post("/api/firs/submit", submissionData);
+
+      if (response.status === 200 || response.status === 201) {
+        setStatus({ type: "success", message: "Theft E-FIR submitted successfully. You can track its status in 'My Reports'." });
+        setFormData({});
+        e.target.reset();
+      }
+    } catch (error) {
+      console.error("Submission error:", error);
+      setStatus({ 
+        type: "error", 
+        message: error.response?.data?.message || "Failed to submit FIR. Please try again." 
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -36,6 +61,19 @@ export default function TheftEFIRForm() {
 
           {/* Form Section */}
           <div className="p-8">
+            {status.type === "success" && (
+              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center space-x-3 text-green-700">
+                <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
+                <p>{status.message}</p>
+              </div>
+            )}
+            {status.type === "error" && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center space-x-3 text-red-700">
+                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                <p>{status.message}</p>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Incident Details Section */}
               <div className="bg-gray-50 rounded-xl p-6 border-l-4 border-blue-500">
@@ -220,12 +258,17 @@ export default function TheftEFIRForm() {
               <div className="pt-6">
                 <button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center space-x-3"
+                  disabled={loading}
+                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                  </svg>
-                  <span>Submit Theft Report</span>
+                  {loading ? (
+                    <Loader2 className="w-6 h-6 animate-spin" />
+                  ) : (
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                  )}
+                  <span>{loading ? "Submitting..." : "Submit Theft Report"}</span>
                 </button>
                 <p className="text-gray-500 text-sm text-center mt-3">
                   Your report will be securely processed and forwarded to the appropriate authorities

@@ -18,8 +18,7 @@ import SearchFilters from './SearchFilters';
 import StatisticsCards from './StatisticsCards';
 import DataTable from './DataTable';
 import TrendAnalysis from './TrendAnalysis';
-import axios from 'axios';
-import backend from '@/config';
+import apiClient from '@/lib/apiClient';
 import './enhanced-dashboard.css';
 
 const fadeUpVariant = {
@@ -109,7 +108,7 @@ const EnhancedStatisticalDashboard = () => {
     const handleSearch = async (searchFilters) => {
         setLoading(true);
         try {
-            const response = await axios.get(`${backend.apiUrl}/search`, {
+            const response = await apiClient.get('/search', {
                 params: { state_ut: searchFilters.state },
             });
             if (Array.isArray(response.data)) {

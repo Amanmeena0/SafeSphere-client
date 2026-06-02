@@ -1,20 +1,43 @@
 import { useState } from "react";
+import apiClient from "@/lib/apiClient";
+import { AlertCircle, CheckCircle2, Loader2, ShieldCheck } from "lucide-react";
 
 export default function CyberCrimeForm() {
   const [formData, setFormData] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState({ type: null, message: "" });
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: files ? files[0] : value,
+      [name]: files ? (files.length > 1 ? Array.from(files) : files[0]) : value,
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
-    alert("Cyber Crime report submitted successfully.");
+    setLoading(true);
+    setStatus({ type: null, message: "" });
+
+    try {
+      const submissionData = { ...formData, fir_type: 'cyber_crime' };
+      const response = await apiClient.post("/api/firs/submit", submissionData);
+
+      if (response.status === 200 || response.status === 201) {
+        setStatus({ type: "success", message: "Cyber Crime report submitted successfully. Investigation ID generated." });
+        setFormData({});
+        e.target.reset();
+      }
+    } catch (error) {
+      console.error("Submission error:", error);
+      setStatus({ 
+        type: "error", 
+        message: error.response?.data?.message || "Failed to submit report. Please try again." 
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -25,27 +48,30 @@ export default function CyberCrimeForm() {
           <div className="bg-gradient-to-r from-purple-700 to-indigo-800 px-8 py-6">
             <div className="flex items-center justify-center space-x-3">
               <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
+                <ShieldCheck className="w-7 h-7 text-white" />
               </div>
               <div className="text-center">
                 <h2 className="text-3xl font-bold text-white">Cyber Crime Report</h2>
                 <p className="text-purple-100 text-sm mt-1">Digital Security Incident Reporting</p>
               </div>
             </div>
-            <div className="mt-4 bg-purple-600/30 rounded-lg p-4">
-              <div className="flex items-center space-x-2">
-                <svg className="w-5 h-5 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
-                <p className="text-white text-sm">Report cybersecurity incidents to help protect the digital community. All reports are handled confidentially.</p>
-              </div>
-            </div>
           </div>
 
           {/* Form Section */}
           <div className="p-8">
+            {status.type === "success" && (
+              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center space-x-3 text-green-700">
+                <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
+                <p>{status.message}</p>
+              </div>
+            )}
+            {status.type === "error" && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center space-x-3 text-red-700">
+                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                <p>{status.message}</p>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Incident Type Section */}
               <div className="bg-gray-50 rounded-xl p-6 border-l-4 border-purple-500">
@@ -354,12 +380,15 @@ export default function CyberCrimeForm() {
               <div className="pt-6">
                 <button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center space-x-3"
+                  disabled={loading}
+                  className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                  </svg>
-                  <span>Submit Cyber Crime Report</span>
+                  {loading ? (
+                    <Loader2 className="w-6 h-6 animate-spin" />
+                  ) : (
+                    <ShieldCheck className="w-6 h-6" />
+                  )}
+                  <span>{loading ? "Submitting Report..." : "Submit Cyber Crime Report"}</span>
                 </button>
                 <p className="text-gray-500 text-sm text-center mt-3">
                   Your report will be forwarded to the Cyber Crime Investigation Team for immediate action

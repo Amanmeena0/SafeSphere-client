@@ -15,7 +15,7 @@ import {
   ChevronRight,
   Info
 } from "lucide-react";
-import backend from "@/config";
+import apiClient from "@/lib/apiClient";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -79,11 +79,10 @@ export default function NearestPoliceMap() {
   const fetchNearestStations = async (lat, lon) => {
     setIsSearching(true);
     try {
-      const res = await fetch(
-        `${backend.apiUrl}/sos/nearest-police-stations?lat=${lat}&lon=${lon}&top=3`
+      const res = await apiClient.get(
+        `/sos/nearest-police-stations?lat=${lat}&lon=${lon}&top=3`
       );
-      const data = await res.json();
-      setNearestStations(data);
+      setNearestStations(res.data);
     } catch (error) {
       console.error("Error fetching stations:", error);
     } finally {

@@ -1,18 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import axios from "axios";
+import apiClient from "@/lib/apiClient";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Send, 
-  X, 
-  Bot, 
-  User, 
-  Loader2, 
-  Trash2, 
-  Copy, 
-  Check, 
-  Info
-} from "lucide-react";
-import backend from "@/config";
 
 export default function Chatbot({ onClose }) {
   const [messages, setMessages] = useState([
@@ -50,7 +38,7 @@ export default function Chatbot({ onClose }) {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${backend.apiUrl}/generate`, {
+      const response = await apiClient.post("/generate", {
         query: messageText,
       });
 

@@ -1,39 +1,43 @@
 import { useUser } from "../../../hooks/useAuth";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import apiClient from "@/lib/apiClient";
 import { User, Mail, Shield, Calendar, Phone, Home, Contact, Trash2 } from "lucide-react";
-import backend from "../../../config/";
 
 export default function ProfileInterface() {
-  const { user } = useUser();
+  const { user, isLoaded: isUserLoaded } = useUser();
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const authId = user?.id;
-
   useEffect(() => {
-    if (authId) {
-      axios.get(`${backend.apiUrl}/api/profile/${authId}`)
-        .then(res => setProfile(res.data))
+    if (isUserLoaded && user) {
+      apiClient.get('/profile')
+        .then(res => {
+          setProfile(res.data);
+          setLoading(false);
+        })
         .catch(err => {
           console.error("Failed to fetch profile", err);
-          alert("Failed to load profile data");
+          if (err.response?.status === 404) {
+            // User might be authenticated but profile not created yet
+            navigate('/create-profile');
+          } else {
+            alert("Failed to load profile data");
+          }
+          setLoading(false);
         });
     }
-  }, [authId]);
+  }, [isUserLoaded, user, navigate]);
 
   const handleDeleteAccount = async () => {
     if (!user) return;
     setIsDeleting(true);
 
     try {
-      // Step 1: Delete user data from your backend
-      await axios.delete(`${backend.apiUrl}/api/profile/${authId}`);
-
-      // Step 2: Redirect to homepage
+      await apiClient.delete('/profile');
       navigate('/');
     } catch (error) {
       console.error("Error deleting account:", error);
@@ -41,15 +45,29 @@ export default function ProfileInterface() {
       setIsDeleting(false);
     }
   };
-  
-  
-  if (!user || !profile) {
+
+  if (!isUserLoaded || loading) {
     return (
       <div className="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow-md">
         <p className="text-gray-600 text-center">Loading profile...</p>
       </div>
     );
   }
+
+  if (!profile) {
+    return (
+      <div className="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow-md">
+        <p className="text-gray-600 text-center">Profile not found.</p>
+        <button 
+          onClick={() => navigate('/create-profile')}
+          className="w-full mt-4 py-2 px-4 bg-blue-600 text-white rounded-md"
+        >
+          Create Profile
+        </button>
+      </div>
+    );
+  }
+
 
   const {
     name,

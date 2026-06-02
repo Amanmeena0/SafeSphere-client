@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
-import backend from "@/config";
+import apiClient from "@/lib/apiClient";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -10,6 +9,7 @@ import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import { motion } from "framer-motion";
 import { 
   Map as MapIcon, 
+  MapPin,
   Search, 
   Filter, 
   Table as TableIcon, 
@@ -48,7 +48,7 @@ const CrimeMap = () => {
   const [yearFilter, setYearFilter] = useState("");
 
   useEffect(() => {
-    axios.get(`${backend.apiUrl}/api/crime-data`)
+    apiClient.get('/api/crime-data')
       .then((res) => {
         setCrimeData(res.data);
         setFilteredData(res.data);

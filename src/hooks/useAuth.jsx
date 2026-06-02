@@ -1,56 +1,36 @@
-import { useState, useEffect } from 'react';
-
-// Mock user for testing without Clerk
-const MOCK_USER = {
-  id: 'user_mock_12345',
-  firstName: 'John',
-  lastName: 'Doe',
-  fullName: 'John Doe',
-  primaryEmailAddress: { emailAddress: 'john.doe@example.com' },
-  imageUrl: 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y',
-  publicMetadata: {
-    role: 'civilian', // or 'police'
-    profileCompleted: true
-  }
-};
+import { useAuth as useClerkAuth, useUser as useClerkUser } from '@clerk/clerk-react';
+import { useEffect } from 'react';
+import { setupInterceptors } from '../lib/apiClient';
 
 export const useAuth = () => {
-  const [isSignedIn, setIsSignedIn] = useState(true);
-  const [userId, setUserId] = useState(MOCK_USER.id);
+  const { isLoaded, isSignedIn, userId, signOut, getToken } = useClerkAuth();
 
   return {
+    isLoaded,
     isSignedIn,
     userId,
-    signOut: () => setIsSignedIn(false),
+    signOut,
+    getToken
   };
 };
 
 export const useUser = () => {
-  const [user, setUser] = useState(MOCK_USER);
+  const { isLoaded, isSignedIn, user } = useClerkUser();
 
   return {
-    isSignedIn: true,
-    user,
-    isLoaded: true,
+    isLoaded,
+    isSignedIn,
+    user
   };
 };
 
-export const SignedIn = ({ children }) => {
-  return <>{children}</>;
-};
+// Component to initialize the interceptor with the token getter
+export const AuthTokenInterceptor = () => {
+  const { getToken, signOut } = useClerkAuth();
 
-export const SignedOut = ({ children }) => {
+  useEffect(() => {
+    setupInterceptors(getToken, signOut);
+  }, [getToken, signOut]);
+
   return null;
-};
-
-export const SignOutButton = ({ children }) => {
-  return <>{children}</>;
-};
-
-export const SignIn = () => {
-  return <div>Sign In (Mock)</div>;
-};
-
-export const SignUp = () => {
-  return <div>Sign Up (Mock)</div>;
 };
