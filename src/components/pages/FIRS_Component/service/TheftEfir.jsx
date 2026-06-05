@@ -1,8 +1,10 @@
 import { useState } from "react";
 import apiClient from "@/lib/apiClient";
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { useAuth } from "@clerk/clerk-react";
 
 export default function TheftEFIRForm() {
+  const { getToken } = useAuth();
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState({ type: null, message: "" });
@@ -30,6 +32,13 @@ export default function TheftEFIRForm() {
     setStatus({ type: null, message: "" });
 
     try {
+      console.log("Fetching auth token...");
+      const token = await getToken();
+      if (!token) {
+        throw new Error("No authentication token found. Please sign in again.");
+      }
+      console.log("Token retrieved successfully");
+
       let base64File = "";
       // The file input name is "files" in the JSX below
       if (formData.files) {
@@ -51,7 +60,12 @@ export default function TheftEFIRForm() {
         police_station: formData.policeStation || "",
       };
 
-      const response = await apiClient.post("/api/firs/theft", submissionData);
+      console.log("Submitting FIR to backend...");
+      const response = await apiClient.post("/api/firs/theft", submissionData, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
 
       if (response.status === 200 || response.status === 201) {
         setStatus({ type: "success", message: "Theft E-FIR submitted successfully. You can track its status in 'My Reports'." });
@@ -62,7 +76,7 @@ export default function TheftEFIRForm() {
       console.error("Submission error:", error);
       setStatus({ 
         type: "error", 
-        message: error.response?.data?.error || error.response?.data?.message || "Failed to submit FIR. Please try again." 
+        message: error.response?.data?.error || error.response?.data?.message || error.message || "Failed to submit FIR. Please try again." 
       });
     } finally {
       setLoading(false);
@@ -284,7 +298,7 @@ export default function TheftEFIRForm() {
                       onChange={handleChange}
                       required
                     />
-                  </div>
+                  </div>  
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Security Verification</label>
                     <div className="flex items-center space-x-4">
