@@ -31,16 +31,18 @@ const SOSReport = () => {
     setIsSubmitting(true);
 
     try {
-      // Placeholder for API call
-      console.log('Submitting report:', formData);
-      setTimeout(() => {
-        setResponseMessage('🚨 SOS Report submitted successfully. Response teams have been notified.');
-        setIsSubmitting(false);
-        setStep(2);
-      }, 1500);
+      await apiClient.post('/api/sos/trigger', {
+        location: formData.location,
+        incident_type: formData.incidentType,
+        description: formData.description
+      });
+      
+      setResponseMessage('🚨 SOS Report submitted successfully. Response teams have been notified.');
+      setStep(2);
     } catch (error) {
       console.error(error);
       setResponseMessage('❌ Failed to submit report. Please try again or call emergency services.');
+    } finally {
       setIsSubmitting(false);
     }
   };

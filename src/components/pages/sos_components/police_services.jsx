@@ -80,7 +80,7 @@ export default function NearestPoliceMap() {
     setIsSearching(true);
     try {
       const res = await apiClient.get(
-        `/sos/nearest-police-stations?lat=${lat}&lon=${lon}&top=3`
+        `/api/search/police-stations?lat=${lat}&lon=${lon}&top=3`
       );
       setNearestStations(res.data);
     } catch (error) {

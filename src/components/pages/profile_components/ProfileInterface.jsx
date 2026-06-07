@@ -72,13 +72,6 @@ export default function ProfileInterface() {
   const {
     name,
     email,
-    phone,
-    address,
-    aadhar_number,
-    role,
-    date_of_birth,
-    emergency_contact_name,
-    emergency_contact_phone,
     registration_date,
     status
   } = profile;
@@ -94,30 +87,20 @@ export default function ProfileInterface() {
           )}
         </div>
         <h2 className="text-xl font-semibold text-gray-800">{name}</h2>
-        <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium mt-2 ${
-          role === 'police' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
-        }`}>
-          {role.charAt(0).toUpperCase() + role.slice(1)}
+        <span className="inline-block px-3 py-1 rounded-full text-xs font-medium mt-2 bg-green-100 text-green-800">
+          Citizen
         </span>
       </div>
 
       <div className="space-y-3 text-sm text-gray-700">
         <div className="flex items-center"><Mail className="w-4 h-4 mr-2" /> {email}</div>
-        <div className="flex items-center"><Phone className="w-4 h-4 mr-2" /> {phone}</div>
-        <div className="flex items-center"><Home className="w-4 h-4 mr-2" /> {address}</div>
-        <div className="flex items-center"><Shield className="w-4 h-4 mr-2" /> Aadhar: **** **** {aadhar_number.slice(-4)}</div>
-        <div className="flex items-center"><Calendar className="w-4 h-4 mr-2" /> DOB: {new Date(date_of_birth).toLocaleDateString()}</div>
-        <div className="flex items-center"><Contact className="w-4 h-4 mr-2" /> Emergency: {emergency_contact_name} ({emergency_contact_phone})</div>
+        <div className="flex items-center"><Calendar className="w-4 h-4 mr-2" /> Member Since: {new Date(registration_date).toLocaleDateString()}</div>
       </div>
 
-      <div className="mt-6 pt-6 border-t border-gray-200 grid grid-cols-2 gap-4 text-center">
+      <div className="mt-6 pt-6 border-t border-gray-200 grid grid-cols-1 gap-4 text-center">
         <div>
-          <p className="text-xs text-gray-500">Status</p>
-          <p className="text-sm font-medium text-green-600 capitalize">{status}</p>
-        </div>
-        <div>
-          <p className="text-xs text-gray-500">Registered</p>
-          <p className="text-sm font-medium text-gray-700">{new Date(registration_date).toLocaleDateString()}</p>
+          <p className="text-xs text-gray-500">Account Status</p>
+          <p className="text-sm font-medium text-green-600 capitalize">{status || 'Active'}</p>
         </div>
       </div>
 
