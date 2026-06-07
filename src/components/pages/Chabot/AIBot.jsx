@@ -49,16 +49,55 @@ export default function Chatbot({ onClose }) {
     setLoading(true);
 
     try {
-      const response = await apiClient.post("/generate", {
+      const response = await apiClient.post("/api/bot/generate", {
         query: messageText,
       });
 
-      const botMessage = {
-        sender: "bot",
-        text: response.data.result || "No response received.",
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      const taskId = response.data.task_id;
+      if (!taskId) {
+        throw new Error("No task ID received from server.");
+      }
+
+      // Polling for task completion
+      let attempts = 0;
+      const maxAttempts = 30; // 30 seconds max (1s per poll)
+      
+      const pollTaskStatus = async () => {
+        try {
+          const statusRes = await apiClient.get(`/api/bot/status/${taskId}`);
+          const { status, result } = statusRes.data;
+
+          if (status === "completed") {
+            const botMessage = {
+              sender: "bot",
+              text: result || "No response received.",
+              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+            setMessages((prev) => [...prev, botMessage]);
+            setLoading(false);
+          } else if (status === "failed") {
+            throw new Error("AI generation failed.");
+          } else if (attempts < maxAttempts) {
+            attempts++;
+            setTimeout(pollTaskStatus, 1000);
+          } else {
+            throw new Error("Request timed out.");
+          }
+        } catch (error) {
+          console.error("Polling error:", error);
+          setMessages((prev) => [
+            ...prev,
+            { 
+              sender: "bot", 
+              text: "⚠️ Sorry, I'm having trouble getting a response. Please try again.",
+              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            },
+          ]);
+          setLoading(false);
+        }
       };
-      setMessages((prev) => [...prev, botMessage]);
+
+      pollTaskStatus();
     } catch (error) {
       setMessages((prev) => [
         ...prev,
@@ -68,7 +107,6 @@ export default function Chatbot({ onClose }) {
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         },
       ]);
-    } finally {
       setLoading(false);
     }
   };

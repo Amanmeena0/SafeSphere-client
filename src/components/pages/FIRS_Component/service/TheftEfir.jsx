@@ -61,11 +61,7 @@ export default function TheftEFIRForm() {
       };
 
       console.log("Submitting FIR to backend...");
-      const response = await apiClient.post("/api/firs/theft", submissionData, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const response = await apiClient.post("/api/fir/theft", submissionData);
 
       if (response.status === 200 || response.status === 201) {
         setStatus({ type: "success", message: "Theft E-FIR submitted successfully. You can track its status in 'My Reports'." });

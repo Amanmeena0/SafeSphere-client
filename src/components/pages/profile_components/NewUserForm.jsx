@@ -37,7 +37,7 @@ export default function NewUserForm() {
     setError('');
 
     try {
-      const response = await apiClient.post('/profile/register', formData);
+      const response = await apiClient.post('/api/profile/register', formData);
 
       if (response.status === 200 || response.status === 201) {
         setMessage('Profile created successfully!');

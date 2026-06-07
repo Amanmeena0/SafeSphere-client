@@ -14,7 +14,7 @@ export default function ProfileInterface() {
 
   useEffect(() => {
     if (isUserLoaded && user) {
-      apiClient.get('/profile')
+      apiClient.get('/api/profile/me')
         .then(res => {
           setProfile(res.data);
           setLoading(false);
@@ -37,7 +37,7 @@ export default function ProfileInterface() {
     setIsDeleting(true);
 
     try {
-      await apiClient.delete('/profile');
+      await apiClient.delete('/api/profile/me');
       navigate('/');
     } catch (error) {
       console.error("Error deleting account:", error);

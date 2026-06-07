@@ -108,7 +108,7 @@ const EnhancedStatisticalDashboard = () => {
     const handleSearch = async (searchFilters) => {
         setLoading(true);
         try {
-            const response = await apiClient.get('/search', {
+            const response = await apiClient.get('/api/search', {
                 params: { state_ut: searchFilters.state },
             });
             if (Array.isArray(response.data)) {
