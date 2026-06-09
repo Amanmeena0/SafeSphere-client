@@ -71,10 +71,14 @@ export default function ProfileInterface() {
 
   const {
     name,
+    first_name,
+    last_name,
     email,
     registration_date,
     status
   } = profile;
+
+  const displayName = first_name ? `${first_name} ${last_name || ''}`.trim() : name;
 
   return (
     <div className="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow-md">
@@ -86,7 +90,7 @@ export default function ProfileInterface() {
             <User className="w-10 h-10 text-gray-500" />
           )}
         </div>
-        <h2 className="text-xl font-semibold text-gray-800">{name}</h2>
+        <h2 className="text-xl font-semibold text-gray-800">{displayName}</h2>
         <span className="inline-block px-3 py-1 rounded-full text-xs font-medium mt-2 bg-green-100 text-green-800">
           Citizen
         </span>

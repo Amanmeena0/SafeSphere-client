@@ -1,10 +1,8 @@
 import { useState } from "react";
 import apiClient from "@/lib/apiClient";
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
-import { useAuth } from "@clerk/clerk-react";
 
 export default function TheftEFIRForm() {
-  const { getToken } = useAuth();
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState({ type: null, message: "" });
@@ -32,13 +30,6 @@ export default function TheftEFIRForm() {
     setStatus({ type: null, message: "" });
 
     try {
-      console.log("Fetching auth token...");
-      const token = await getToken();
-      if (!token) {
-        throw new Error("No authentication token found. Please sign in again.");
-      }
-      console.log("Token retrieved successfully");
-
       let base64File = "";
       // The file input name is "files" in the JSX below
       if (formData.files) {

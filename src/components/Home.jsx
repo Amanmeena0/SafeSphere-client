@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { useUser } from "../hooks/useAuth"; 
-import SOData from './pages/sos_components/sos_Data';
 import { ShieldCheck, MapPin, FileText, Headset, Activity, FileEdit, TriangleAlert, Bot, ArrowRight, Mail, PhoneCall } from 'lucide-react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 
@@ -30,7 +29,6 @@ const Home = () => {
     );
   }
 
-  const role = user?.publicMetadata?.role || 'civilian';
   const userName = user?.firstName || user?.username || 'Citizen';
 
   return (
@@ -98,27 +96,6 @@ const Home = () => {
             </motion.div>
           </div>
         </section>
-
-        {/* Role-specific Dashboard Integration */}
-        {role === "police" && (
-          <motion.section 
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={fadeUpVariant}
-            className="px-6 lg:px-12 max-w-7xl mx-auto py-12"
-          >
-            <div className="bg-white dark:bg-[#0B1F3A]/50 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none">
-               <div className="flex items-center gap-4 mb-8">
-                 <div className="w-12 h-12 bg-[#C1121F]/10 text-[#C1121F] rounded-2xl flex items-center justify-center">
-                   <TriangleAlert className="w-6 h-6" />
-                 </div>
-                 <h2 className="text-2xl font-bold text-[#0B1F3A] dark:text-white">Emergency Dashboard</h2>
-               </div>
-               <SOData />
-            </div>
-          </motion.section>
-        )}
 
         {/* Features / How it Works */}
         <section className="py-24 bg-white dark:bg-[#0B1F3A]/20 border-y border-slate-100 dark:border-slate-800/50">

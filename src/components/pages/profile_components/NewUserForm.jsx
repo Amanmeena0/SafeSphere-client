@@ -172,23 +172,6 @@ export default function NewUserForm() {
               />
             </div>
 
-            {/* Role Selection */}
-            <div>
-              <label htmlFor="role" className="block text-sm font-medium text-gray-700">
-                Role
-              </label>
-              <select
-                id="role"
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="civilian">Civilian</option>
-                <option value="police">Police Officer</option>
-              </select>
-            </div>
-
             {/* Emergency Contact */}
             <div>
               <label htmlFor="emergencyContact" className="block text-sm font-medium text-gray-700">
