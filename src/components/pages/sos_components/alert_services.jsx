@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   AlertTriangle, 
@@ -10,10 +10,14 @@ import {
   Info,
   ChevronRight
 } from 'lucide-react';
+import LocationSelector from './LocationSelector';
+import apiClient from '@/lib/apiClient';
 
 const SOSReport = () => {
   const [formData, setFormData] = useState({
     location: '',
+    latitude: null,
+    longitude: null,
     incidentType: '',
     description: ''
   });
@@ -26,6 +30,15 @@ const SOSReport = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleLocationChange = useCallback((locationData) => {
+    setFormData(prev => ({
+      ...prev,
+      location: locationData.address,
+      latitude: locationData.latitude,
+      longitude: locationData.longitude
+    }));
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -33,6 +46,8 @@ const SOSReport = () => {
     try {
       await apiClient.post('/api/sos/trigger', {
         location: formData.location,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
         incident_type: formData.incidentType,
         description: formData.description
       });
@@ -89,21 +104,10 @@ const SOSReport = () => {
                   className="space-y-6"
                 >
                   <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
-                        <MapPin className="w-4 h-4 text-red-500" />
-                        Incident Location
-                      </label>
-                      <input
-                        type="text"
-                        name="location"
-                        required
-                        value={formData.location}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 dark:text-white transition-all"
-                        placeholder="Street address, Landmark, or City"
-                      />
-                    </div>
+                    <LocationSelector 
+                      onLocationChange={handleLocationChange} 
+                      initialLocation={formData.location} 
+                    />
 
                     <div>
                       <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-2">
