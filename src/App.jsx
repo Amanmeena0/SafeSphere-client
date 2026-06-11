@@ -24,8 +24,6 @@ const CrimeMap = lazy(() => import('./components/pages/sos_components/crime_clus
 const SOData = lazy(() => import('./components/pages/sos_components/sos_Data'));
 const EmergencyContacts = lazy(() => import('./components/pages/sos_components/contacts-police'));
 const AboutUs = lazy(() => import('./components/AboutUs'));
-const ProfileInterface = lazy(() => import('./components/pages/profile_components/ProfileInterface'));
-const NewUserForm = lazy(() => import('./components/pages/profile_components/NewUserForm'));
 const MyReports = lazy(() => import('./components/pages/profile_components/MyReports'));
 
 // Loading fallback
