@@ -24,7 +24,7 @@ const CrimeMap = lazy(() => import('../features/sos/pages/crime_cluster_service'
 const SOData = lazy(() => import('../features/sos/pages/sos_Data'));
 const EmergencyContacts = lazy(() => import('../features/sos/pages/contacts-police'));
 const AboutUs = lazy(() => import('../components/AboutUs'));
-const MyReports = lazy(() => import('../components/pages/profile_components/MyReports'));
+const MyReports = lazy(() => import('../features/profile/pages/MyReports'));
 
 // Loading fallback
 const PageLoader = () => (
@@ -44,8 +44,6 @@ function App() {
           <Route path="/about" element={<AboutUs />} />
           
           {/* Protected Routes */}
-          <Route path="/profile" element={<ProtectedRoute><ProfileInterface /></ProtectedRoute>} />
-          <Route path="/create-profile" element={<ProtectedRoute><NewUserForm /></ProtectedRoute>} />
           <Route path="/my-reports" element={<ProtectedRoute><MyReports /></ProtectedRoute>} />
           
           {/* statistics */}

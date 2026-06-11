@@ -30,9 +30,7 @@ const itemVariants = {
 };
 
 export default function FirRegister() {
-  const [activeTab, setActiveTab] = useState("citizen");
-
-  const citizenServices = [
+  const allServices = [
     { title: "Lost Report", icon: HelpCircle, link: "/LostItemReport", description: "Report lost items for police verification." },
     { title: "MV Theft E-FIR", icon: Car, link: "/MVTheftEfir", description: "Electronic FIR for Motor Vehicle theft." },
     { title: "Missing Person", icon: FileEdit, link: "/MissingPersonForm", description: "Register reports for missing individuals." },
@@ -40,17 +38,6 @@ export default function FirRegister() {
     { title: "Theft e-FIR", icon: Shield, link: "/TheftEfir", description: "File digital FIR for general theft incidents." },
     { title: "Cyber Crime", icon: Shield, link: "/CyberCrime", description: "Report online fraud and digital harassment." },
     { title: "Rape Case", icon: Shield, link: "/RapeCase", description: "Immediate reporting for sexual assault cases." },
-  ];
-
-  const policeServices = [
-    { title: "FIR Status", icon: ClipboardList, link: "/FirStatus", description: "Track the progress of your filed FIRs." },
-    { title: "Police Clearance", icon: FileCheck, link: "/PoliceClearanceCertifice", description: "Apply for PCC and character certificates." },
-  ];
-
-  const firDataServices = [
-    { title: "FIR Records", icon: Database, link: "/FirRecords", description: "Access public records of registered FIRs." },
-    { title: "Case History", icon: History, link: "/CaseHistory", description: "View historical data of resolved cases." },
-    { title: "Evidence Tracking", icon: Folder, link: "/EvidenceManagement", description: "Manage digital evidence for active cases." },
   ];
 
   const renderServiceCards = (services) => (
@@ -98,37 +85,13 @@ export default function FirRegister() {
             transition={{ delay: 0.1 }}
             className="text-slate-600 dark:text-slate-400 font-medium max-w-2xl mx-auto text-lg"
           >
-            Access all SafeSphere citizen and law enforcement tools in one unified interface.
+            Access all SafeSphere tools and safety resources in one unified interface.
           </motion.p>
-        </div>
-
-        {/* Tab Navigation */}
-        <div className="flex flex-wrap justify-center mb-12 p-1.5 bg-slate-200/50 dark:bg-slate-800/30 rounded-2xl w-fit mx-auto border border-slate-200 dark:border-slate-700/50 backdrop-blur-sm">
-          {[
-            { id: "citizen", label: "File FIR", icon: FileEdit },
-            { id: "police", label: "Status & Verification", icon: ClipboardList },
-            { id: "firData", label: "Crime Data", icon: Database }
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 ${
-                activeTab === tab.id 
-                  ? "bg-white dark:bg-blue-600 text-blue-600 dark:text-white shadow-lg" 
-                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-              }`}
-            >
-              <tab.icon className="w-4 h-4" />
-              {tab.label}
-            </button>
-          ))}
         </div>
 
         {/* Service Content */}
         <div className="mt-8">
-          {activeTab === "citizen" && renderServiceCards(citizenServices)}
-          {activeTab === "police" && renderServiceCards(policeServices)}
-          {activeTab === "firData" && renderServiceCards(firDataServices)}
+          {renderServiceCards(allServices)}
         </div>
       </div>
     </div>
