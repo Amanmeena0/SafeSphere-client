@@ -1,4 +1,4 @@
-import { useUser } from "../../../hooks/useAuth";
+import { useUser } from "@/shared/hooks/useAuth";
 
 export default function Dashboard() {
   const { user } = useUser();

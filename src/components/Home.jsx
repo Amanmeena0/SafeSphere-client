@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useUser } from "../hooks/useAuth"; 
+import { useUser } from "@/shared/hooks/useAuth"; 
 import { ShieldCheck, MapPin, FileText, Headset, Activity, FileEdit, TriangleAlert, Bot, ArrowRight, Mail, PhoneCall } from 'lucide-react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 
