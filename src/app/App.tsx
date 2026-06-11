@@ -21,7 +21,6 @@ const SOSMainPage = lazy(() => import('../components/sos'));
 const NearestPoliceStation = lazy(() => import('../features/sos/pages/police_services'));
 const SOSReport = lazy(() => import('../features/sos/pages/alert_services'));
 const CrimeMap = lazy(() => import('../features/sos/pages/crime_cluster_service'));
-const SOData = lazy(() => import('../features/sos/pages/sos_Data'));
 const EmergencyContacts = lazy(() => import('../features/sos/pages/contacts-police'));
 const AboutUs = lazy(() => import('../components/AboutUs'));
 const MyReports = lazy(() => import('../features/profile/pages/MyReports'));
@@ -64,7 +63,6 @@ function App() {
           <Route path="/police_services" element={<NearestPoliceStation />} />
           <Route path="/alert_services" element={<SOSReport />} />
           <Route path="/crime_cluster_service" element={<CrimeMap />} />
-          <Route path="/sos_data" element={<SOData />} />
           <Route path="/contacts-police" element={<EmergencyContacts/>}/>
           
           {/* Default route fallback */}

@@ -44,14 +44,6 @@ const sosModules = [
     color: 'from-amber-500 to-yellow-600',
     hoverColor: 'hover:shadow-amber-500/20'
   },
-  { 
-    name: 'SOS Data Archive', 
-    description: 'Review historical SOS logs and resolution metrics.',
-    path: '/sos_data', 
-    icon: <Database className="w-8 h-8" />,
-    color: 'from-slate-700 to-slate-900',
-    hoverColor: 'hover:shadow-slate-500/20'
-  },
 ];
 
 const fadeUpVariant = {
