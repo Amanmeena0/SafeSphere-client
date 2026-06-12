@@ -1,29 +1,29 @@
 // App.jsx
 import { Suspense, lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import MainLayout from '../layouts/MainLayout';
-import ProtectedRoute from '../components/ProtectedRoute';
+import MainLayout from '@/layouts/MainLayout';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import { AuthTokenInterceptor } from '@/shared/hooks/useAuth';
-import '../index.css';
+import '@/global.css';
 
 // Lazy loaded components
-const Home = lazy(() => import('../components/Home'));
-const Statistics = lazy(() => import('../features/statistics/pages/DashboardPage'));
-const FirRegister = lazy(() => import('../components/FirRegister'));
-const LostReportForm = lazy(() => import('../features/fir/pages/LostItemReport'));
-const MVTheftFIRForm = lazy(() => import('../features/fir/pages/MVTheftEfir'));
-const MissingPerson = lazy(() => import('../features/fir/pages/MissingPersonform'));
-const DomesticTenantForm = lazy(() => import('../features/fir/pages/DomesticHelp&TenantRegistration'));
-const TheftEFIRForm = lazy(() => import('../features/fir/pages/TheftEfir'));
-const CyberCrimeForm = lazy(() => import('../features/fir/pages/CyberCrime'));
-const RapeCaseForm = lazy(() => import('../features/fir/pages/RapeCase'));
-const SOSMainPage = lazy(() => import('../components/sos'));
-const NearestPoliceStation = lazy(() => import('../features/sos/pages/police_services'));
-const SOSReport = lazy(() => import('../features/sos/pages/alert_services'));
-const CrimeMap = lazy(() => import('../features/sos/pages/crime_cluster_service'));
-const EmergencyContacts = lazy(() => import('../features/sos/pages/contacts-police'));
-const AboutUs = lazy(() => import('../components/AboutUs'));
-const MyReports = lazy(() => import('../features/profile/pages/MyReports'));
+const Home = lazy(() => import('@/components/Home'));
+const Statistics = lazy(() => import('@/features/statistics/pages/DashboardPage'));
+const FirRegister = lazy(() => import('@/components/FirRegister'));
+const LostReportForm = lazy(() => import('@/features/fir/pages/LostItemReport'));
+const MVTheftFIRForm = lazy(() => import('@/features/fir/pages/MVTheftEfir'));
+const MissingPerson = lazy(() => import('@/features/fir/pages/MissingPersonform'));
+const DomesticTenantForm = lazy(() => import('@/features/fir/pages/DomesticHelp&TenantRegistration'));
+const TheftEFIRForm = lazy(() => import('@/features/fir/pages/TheftEfir'));
+const CyberCrimeForm = lazy(() => import('@/features/fir/pages/CyberCrime'));
+const RapeCaseForm = lazy(() => import('@/features/fir/pages/RapeCase'));
+const SOSMainPage = lazy(() => import('@/components/sos'));
+const NearestPoliceStation = lazy(() => import('@/features/sos/pages/police_services'));
+const SOSReport = lazy(() => import('@/features/sos/pages/alert_services'));
+const CrimeMap = lazy(() => import('@/features/sos/pages/crime_cluster_service'));
+const EmergencyContacts = lazy(() => import('@/features/sos/pages/contacts-police'));
+const AboutUs = lazy(() => import('@/components/AboutUs'));
+const MyReports = lazy(() => import('@/features/profile/pages/MyReports'));
 
 // Loading fallback
 const PageLoader = () => (
