@@ -38,17 +38,16 @@ export default function RapeCaseForm() {
 
       const submissionData = {
         victim_name: formData.victimName || "",
-        victim_age: formData.victimAge || "",
-        victim_gender: formData.victimGender || "",
-        incident_description: formData.incidentDescription || "",
-        perpetrator_info: formData.perpetratorInfo || "",
-        location: formData.location || "",
-        date: formData.date || "",
-        time: formData.time || "",
-        informant_info: formData.informantInfo || "",
+        age: formData.victimAge ? parseInt(formData.victimAge) : undefined,
+        gender: formData.victimGender || "",
+        incidentDetails: formData.incidentDescription || "",
+        perpetratorDetails: formData.perpetratorInfo || "",
+        location_of_incident: formData.location || "",
+        date_of_incident: formData.date || "",
+        time_of_incident: formData.time || "",
+        informant_details: formData.informantInfo || "",
         police_station: formData.policeStation || "",
-        complainant_details: formData.informantInfo || formData.victimName || "",
-        upload_documents: base64Evidence,
+        upload_document: base64Evidence,
       };
 
       const success = await submitRapeCase(submissionData);

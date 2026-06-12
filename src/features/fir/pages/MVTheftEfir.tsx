@@ -37,16 +37,14 @@ export default function MVTheftFIRForm() {
       }
 
       const submissionData = {
-        vehicle_details: formData.vehicleDetails || "",
+        vehicleDetails: formData.vehicleDetails || "",
         owner_details: formData.ownerDetails || "",
         date_of_theft: formData.dateOfTheft || "",
-        time_of_theft: formData.timeOfTheft || "",
+        timeoftheft: formData.timeOfTheft || "",
         location_of_theft: formData.locationOfTheft || "",
-        fir_details: formData.firDetails || "",
+        previous_fir_details: formData.firDetails || "",
         police_station: formData.policeStation || "",
-        incident_description: `Motor Vehicle Theft. Vehicle: ${formData.vehicleDetails}. Location: ${formData.locationOfTheft}`,
-        complainant_details: formData.ownerDetails || "",
-        upload_documents: base64Docs,
+        upload_document: base64Docs,
       };
 
       const success = await submitMvTheft(submissionData);

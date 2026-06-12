@@ -37,23 +37,20 @@ export default function DomesticTenantForm() {
       }
 
       const submissionData = {
-        applicant_type: formData.applicantType || "",
-        full_name: formData.fullName || "",
-        age: formData.age || "",
-        gender: formData.gender || "",
-        contact_number: formData.contactNumber || "",
-        email: formData.email || "",
-        native_place: formData.nativePlace || "",
+        registeration_type: formData.applicantType || "",
+        reporter_details: formData.fullName || "",
+        reporter_age: formData.age ? parseInt(formData.age) : undefined,
+        reporter_gender: formData.gender || "",
+        reporter_contact: formData.contactNumber || "",
+        reporter_Emailaddress: formData.email || "",
+        reporter_native_place: formData.nativePlace || "",
         employer_name: formData.employerName || "",
         employer_contact: formData.employerContact || "",
-        relationship: formData.relationship || "",
+        employer_relations: formData.relationship || "",
         employer_address: formData.employerAddress || "",
-        stay_address: formData.stayAddress || "",
-        police_station: formData.policeStation || "",
         duration_of_stay: formData.duration || "",
-        id_proof: base64IdProof,
-        incident_description: `Registration for ${formData.applicantType}`,
-        complainant_details: formData.fullName || "",
+        documentation: base64IdProof,
+        police_station: formData.policeStation || "",
       };
 
       const success = await submitDomesticHelp(submissionData);

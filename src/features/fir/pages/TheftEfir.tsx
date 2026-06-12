@@ -42,8 +42,8 @@ export default function TheftEFIRForm() {
         financial_impact: formData.estimatedLoss || "",
         witness_information: formData.witnessInfo || "",
         complainant_details: formData.complainantDetails || "",
-        upload_documents: base64File,
         police_station: formData.policeStation || "",
+        upload_document: base64File,
       };
 
       console.log("Submitting FIR to backend...");

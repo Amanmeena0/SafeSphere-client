@@ -53,16 +53,14 @@ export default function LostReportForm() {
         item_name: formData.itemName || "",
         brand: formData.brand || "",
         model: formData.model || "",
-        place_of_loss: formData.placeOfLoss || "",
-        date_time_of_loss: formData.dateTimeOfLoss || "",
+        placeofloss: formData.placeOfLoss || "",
+        loss_datetime: formData.dateTimeOfLoss || "",
         owner_name: formData.ownerName || "",
-        contact: formData.contact || "",
+        contact_number: formData.contact || "",
         address: formData.address || "",
         district: formData.district || "",
         police_station: formData.policeStation || "",
-        incident_description: `Lost item: ${formData.itemName}. Place: ${formData.placeOfLoss}`,
-        complainant_details: formData.ownerName || "",
-        upload_documents: base64File,
+        document_type: base64File,
       };
 
       const success = await submitLostItem(submissionData);

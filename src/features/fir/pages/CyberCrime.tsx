@@ -36,22 +36,21 @@ export default function CyberCrimeForm() {
       }
 
       const submissionData = {
-        category: formData.category || "",
+        crimeCategory: formData.category || "",
         platform: formData.platform || "",
-        date: formData.date || "",
+        date_of_incident: formData.date || "",
         time: formData.time || "",
-        ip_address: formData.ipAddress || "",
-        incident_description: formData.incidentDescription || "",
-        victim_full_name: formData.victimFullName || "",
-        victim_phone: formData.victimPhone || "",
-        victim_email: formData.victimEmail || "",
-        victim_address: formData.victimAddress || "",
-        victim_age: formData.victimAge || "",
-        victim_gender: formData.victimGender || "",
-        victim_relationship: formData.victimRelationship || "",
-        police_station: formData.policeStation || "",
-        complainant_details: formData.victimFullName || "", // Using victim as complainant if not specified
-        upload_documents: base64Files,
+        IpAddress: formData.ipAddress || "",
+        description: formData.incidentDescription || "",
+        full_name: formData.victimFullName || "",
+        contact_number: formData.victimPhone || "",
+        email: formData.victimEmail || "",
+        address: formData.victimAddress || "",
+        age: formData.victimAge ? parseInt(formData.victimAge) : undefined,
+        gender: formData.victimGender || "",
+        relation: formData.victimRelationship || "",
+        policeStation: formData.policeStation || "",
+        digitalEvidence: base64Files,
       };
 
       const success = await submitCyberCrime(submissionData);

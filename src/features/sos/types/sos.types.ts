@@ -1,5 +1,5 @@
 export interface SOSTriggerData {
-  location: string;
+  location_address: string;
   latitude: number | null;
   longitude: number | null;
   incident_type: string;

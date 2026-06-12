@@ -1,112 +1,114 @@
 import apiClient from '@/lib/apiClient';
 
 export interface BaseFirSubmission {
-  incident_description: string;
-  complainant_details: string;
+  clerk_user_id?: string;
   police_station: string;
-  upload_documents?: string;
+  upload_document?: string;
 }
 
 export interface TheftEfirSubmission extends BaseFirSubmission {
+  incident_description: string;
   date_of_theft: string;
-  financial_impact: string;
+  financial_impact?: string;
   witness_information?: string;
+  complainant_details: string;
 }
 
 export interface CyberCrimeSubmission extends BaseFirSubmission {
-  category: string;
+  crimeCategory: string;
   platform: string;
-  date: string;
+  date_of_incident: string;
   time: string;
-  ip_address?: string;
-  victim_full_name: string;
-  victim_phone: string;
-  victim_email: string;
-  victim_address: string;
-  victim_age?: string;
-  victim_gender?: string;
-  victim_relationship?: string;
+  IpAddress?: string;
+  description: string;
+  digitalEvidence?: string;
+  full_name: string;
+  contact_number: string;
+  email: string;
+  address: string;
+  age?: number;
+  gender?: string;
+  relation?: string;
+  policeStation: string;
 }
 
 export interface DomesticHelpSubmission extends BaseFirSubmission {
-  applicant_type: string;
-  full_name: string;
-  age: string;
-  gender: string;
-  contact_number: string;
-  email?: string;
-  native_place: string;
+  registeration_type: string;
+  reporter_details: string;
+  reporter_age?: number;
+  reporter_gender?: string;
+  reporter_contact?: string;
+  reporter_Emailaddress: string;
+  reporter_native_place: string;
   employer_name: string;
   employer_contact: string;
-  relationship: string;
+  employer_relations: string;
   employer_address: string;
-  stay_address: string;
+  documentation?: string;
   duration_of_stay: string;
-  id_proof?: string;
 }
 
 export interface LostItemSubmission extends BaseFirSubmission {
   item_name: string;
   brand?: string;
   model?: string;
-  place_of_loss: string;
-  date_time_of_loss: string;
+  placeofloss: string;
+  loss_datetime: string;
   owner_name: string;
-  contact: string;
+  contact_number: string;
   address: string;
+  document_type: string;
   district: string;
 }
 
 export interface MissingPersonSubmission extends BaseFirSubmission {
-  name: string;
-  num_missing: string;
-  alias?: string;
-  relative_name: string;
-  relation_type: string;
-  address: string;
-  gender: string;
-  year_of_birth?: string;
-  age_from?: string;
-  age_to?: string;
-  body_build?: string;
-  complexion?: string;
-  weight?: string;
-  height_from_ft?: string;
-  height_from_in?: string;
-  height_to_ft?: string;
-  height_to_in?: string;
-  incidence_details: string;
-  last_seen: string;
-  incident_time: string;
+  Fullname: string;
+  Numberofperson: number;
+  nickname?: string;
+  fathername: string;
+  relation: string;
+  lastknownlocation: string;
+  gender?: string;
+  yearofbirth: number;
+  agefrom: number;
+  ageto: number;
+  bodybuild: string;
+  complexion: string;
+  weight: number;
+  height: number;
+  incidentReport: string;
+  detailsLastseen: string;
+  datetimelastseen: string;
   complainant_name: string;
-  relation_with_missing: string;
-  complainant_address?: string;
-  complainant_mobile: string;
-  complainant_alt_mobile?: string;
-  complainant_email?: string;
-  other_info?: string;
+  relationwithMissingperson: string;
+  complainant_address: string;
+  complainant_contact: string;
+  alternate_contact?: string;
+  emailaddress: string;
+  anyotherdetails?: string;
+  policestation: string;
   district: string;
-  photo?: string;
 }
 
 export interface MvTheftSubmission extends BaseFirSubmission {
-  vehicle_details: string;
+  vehicleDetails: string;
   owner_details: string;
   date_of_theft: string;
-  time_of_theft: string;
+  timeoftheft: string;
   location_of_theft: string;
-  fir_details?: string;
+  previous_fir_details?: string;
 }
 
 export interface RapeCaseSubmission extends BaseFirSubmission {
   victim_name: string;
-  victim_age: string;
-  victim_gender: string;
-  perpetrator_info?: string;
-  location: string;
-  date: string;
-  time: string;
-  informant_info?: string;
+  age: number;
+  gender: string;
+  incidentDetails: string;
+  perpetratorDetails: string;
+  location_of_incident: string;
+  date_of_incident: string;
+  time_of_incident: string;
+  informant_details: string;
 }
 
 export const firService = {

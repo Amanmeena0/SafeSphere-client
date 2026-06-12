@@ -47,7 +47,7 @@ const SOSReport = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     await triggerSOS({
-      location: formData.location,
+      location_address: formData.location,
       latitude: formData.latitude,
       longitude: formData.longitude,
       incident_type: formData.incidentType,
