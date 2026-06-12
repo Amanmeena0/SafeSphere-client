@@ -20,15 +20,52 @@ export default function MyReports() {
     apiClient.get("/api/profile/my-firs")
       .then(res => {
         console.log("My Reports API Response:", res.data);
-        // Ensure data is an array
-        const data = Array.isArray(res.data) ? res.data : [];
-        setReports(data);
+        const rawData = res.data;
+        const flattenedReports = [];
+        
+        // Mapping backend keys to user-friendly labels
+        const typeLabels: { [key: string]: string } = {
+          cyber_crimes: 'Cyber Crime',
+          theft_efirs: 'Theft',
+          lost_items: 'Lost Item',
+          missing_persons: 'Missing Person',
+          domestic_forms: 'Domestic Help/Tenant',
+          rape_cases: 'Sensitive Case',
+          mv_thefts: 'Motor Vehicle Theft'
+        };
+
+        // Flatten the dictionary into a single array for the UI
+        Object.keys(rawData).forEach(key => {
+          if (Array.isArray(rawData[key])) {
+            rawData[key].forEach((report: any) => {
+              flattenedReports.push({
+                ...report,
+                id: report.id || report.auth_id, // Normalize ID field
+                display_type: typeLabels[key] || key,
+                fir_type: key, // Keep original key for icons/styling
+                // Use the most relevant date field available for display/sorting
+                report_date: report.created_at || 
+                             report.registration_date || 
+                             report.date_of_incident || 
+                             report.date_of_theft || 
+                             report.loss_datetime || 
+                             report.datetimelastseen || 
+                             new Date().toISOString()
+              });
+            });
+          }
+        });
+
+        // Sort by date (newest first)
+        flattenedReports.sort((a, b) => new Date(b.report_date).getTime() - new Date(a.report_date).getTime());
+        
+        setReports(flattenedReports);
         setLoading(false);
       })
       .catch(err => {
         console.error("Failed to fetch reports", err);
         setError("Failed to load your reports. Please try again later.");
-        setReports([]); // Ensure it's still an array
+        setReports([]);
         setLoading(false);
       });
   }, []);
@@ -45,8 +82,9 @@ export default function MyReports() {
 
   const getIcon = (type) => {
     switch (type?.toLowerCase()) {
-      case 'theft': return <Tag className="w-5 h-5" />;
-      case 'cyber crime': return <Info className="w-5 h-5" />;
+      case 'theft_efirs':
+      case 'mv_thefts': return <Tag className="w-5 h-5" />;
+      case 'cyber_crimes': return <Info className="w-5 h-5" />;
       default: return <FileText className="w-5 h-5" />;
     }
   };
@@ -94,28 +132,28 @@ export default function MyReports() {
         </div>
       ) : (
         <div className="grid gap-4">
-          {reports.map((report) => (
+          {reports.map((report: any) => (
             <div 
-              key={report.id} 
+              key={`${report.fir_type}-${report.id}`} 
               className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow cursor-pointer group"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <div className={`p-3 rounded-lg ${report.fir_type === 'theft' ? 'bg-orange-50 text-orange-600' : 'bg-purple-50 text-purple-600'}`}>
+                  <div className={`p-3 rounded-lg ${report.fir_type.includes('theft') ? 'bg-orange-50 text-orange-600' : 'bg-purple-50 text-purple-600'}`}>
                     {getIcon(report.fir_type)}
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors capitalize">
-                      {report.fir_type} E-FIR
+                      {report.display_type}
                     </h3>
                     <div className="flex items-center space-x-4 mt-1 text-sm text-gray-500">
                       <span className="flex items-center">
                         <Calendar className="w-3.5 h-3.5 mr-1" />
-                        {new Date(report.created_at).toLocaleDateString()}
+                        {new Date(report.report_date).toLocaleDateString()}
                       </span>
                       <span className="flex items-center">
                         <Clock className="w-3.5 h-3.5 mr-1" />
-                        ID: SS-{report.id.toString().padStart(5, '0')}
+                        ID: {report.id}
                       </span>
                     </div>
                   </div>
