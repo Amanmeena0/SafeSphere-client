@@ -6,3 +6,5 @@ export const botService = {
     return response.data;
   }
 };
+
+export default botService;

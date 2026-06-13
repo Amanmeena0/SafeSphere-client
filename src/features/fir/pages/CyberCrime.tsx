@@ -49,7 +49,7 @@ export default function CyberCrimeForm() {
         age: formData.victimAge ? parseInt(formData.victimAge) : undefined,
         gender: formData.victimGender || "",
         relation: formData.victimRelationship || "",
-        policeStation: formData.policeStation || "",
+        police_station: formData.policeStation || "",
         digitalEvidence: base64Files,
       };
 

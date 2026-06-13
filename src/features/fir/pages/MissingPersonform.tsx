@@ -63,7 +63,7 @@ const MissingPerson = () => {
         alternate_contact: formData.complainant_alt_mobile || "",
         emailaddress: formData.complainant_email || "",
         anyotherdetails: formData.other_info || "",
-        policestation: formData.police_station || "",
+        police_station: formData.police_station || "",
         district: formData.district || "",
         upload_document: base64Photo,
       };

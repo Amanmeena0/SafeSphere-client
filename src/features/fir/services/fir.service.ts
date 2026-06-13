@@ -29,7 +29,6 @@ export interface CyberCrimeSubmission extends BaseFirSubmission {
   age?: number;
   gender?: string;
   relation?: string;
-  policeStation: string;
 }
 
 export interface DomesticHelpSubmission extends BaseFirSubmission {
@@ -86,7 +85,6 @@ export interface MissingPersonSubmission extends BaseFirSubmission {
   alternate_contact?: string;
   emailaddress: string;
   anyotherdetails?: string;
-  policestation: string;
   district: string;
 }
 
@@ -134,3 +132,5 @@ export const firService = {
     return await apiClient.post('/api/fir/rape-case', data);
   }
 };
+
+export default firService;

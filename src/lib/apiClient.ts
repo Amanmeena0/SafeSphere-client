@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -36,7 +36,7 @@ export const setupInterceptors = (getToken, signOut) => {
     (response) => response,
     async (error) => {
       if (error.response?.status === 401) {
-        console.warn('Unauthorized (401) response from backend. Verify JWT validation on Flask.');
+        console.warn('Unauthorized (401) response from backend. Verify JWT validation on FastAPI.');
       }
       return Promise.reject(error);
     }

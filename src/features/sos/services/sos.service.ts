@@ -22,3 +22,5 @@ export const sosService = {
     return Array.isArray(res.data) ? res.data : [];
   },
 };
+
+export default sosService;
