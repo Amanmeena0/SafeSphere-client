@@ -69,9 +69,7 @@ export default function TheftEFIRForm() {
             
             <div className="relative z-10 flex flex-col items-center">
               <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-4 border border-white/30 shadow-xl">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
+                <ShieldCheck className="w-10 h-10 text-white" />
               </div>
               <h2 className="text-4xl font-extrabold text-white tracking-tight">Theft E-FIR Report</h2>
               <p className="text-blue-100 mt-2 font-medium opacity-90">Secure and confidential theft reporting system</p>
@@ -328,9 +326,7 @@ export default function TheftEFIRForm() {
                   {loading ? (
                     <Loader2 className="w-7 h-7 animate-spin" />
                   ) : (
-                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                    </svg>
+                    <ShieldCheck className="w-7 h-7" />
                   )}
                   <span className="text-lg">{loading ? "Processing Report..." : "Submit Theft Report"}</span>
                 </button>

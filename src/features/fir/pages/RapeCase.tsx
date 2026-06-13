@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useSubmitFir } from "../hooks/useSubmitFir";
-import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2, ShieldCheck } from "lucide-react";
 
 export default function RapeCaseForm() {
   const [formData, setFormData] = useState<any>({});
@@ -72,9 +72,7 @@ export default function RapeCaseForm() {
             
             <div className="relative z-10 flex flex-col items-center">
               <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-4 border border-white/30 shadow-xl">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
+                <ShieldCheck className="w-10 h-10 text-white" />
               </div>
               <h2 className="text-4xl font-extrabold text-white tracking-tight">Sensitive Case Report</h2>
               <p className="text-red-100 mt-2 font-medium opacity-90">Confidential and Secure Handling</p>
@@ -365,9 +363,7 @@ export default function RapeCaseForm() {
                   {loading ? (
                     <Loader2 className="w-7 h-7 animate-spin" />
                   ) : (
-                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
+                    <ShieldCheck className="w-7 h-7" />
                   )}
                   <span className="text-lg">{loading ? "Processing..." : "Submit Confidential Report"}</span>
                 </button>

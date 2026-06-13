@@ -75,7 +75,7 @@ export default function CyberCrimeForm() {
             
             <div className="relative z-10 flex flex-col items-center">
               <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-4 border border-white/30 shadow-xl">
-                <ShieldCheck className="w-8 h-8 text-white" />
+                <ShieldCheck className="w-10 h-10 text-white" />
               </div>
               <h2 className="text-4xl font-extrabold text-white tracking-tight">Cyber Crime Report</h2>
               <p className="text-purple-100 mt-2 font-medium opacity-90">Digital Security Incident Reporting</p>

@@ -69,9 +69,7 @@ export default function MVTheftFIRForm() {
             
             <div className="relative z-10 flex flex-col items-center">
               <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-4 border border-white/30 shadow-xl">
-                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
+                <ShieldCheck className="w-10 h-10 text-white" />
               </div>
               <h2 className="text-4xl font-extrabold text-white tracking-tight">Vehicle Theft E-FIR</h2>
               <p className="text-orange-100 mt-2 font-medium opacity-90">Secure reporting for stolen or missing vehicles</p>
@@ -304,9 +302,7 @@ export default function MVTheftFIRForm() {
                   {loading ? (
                     <Loader2 className="w-7 h-7 animate-spin" />
                   ) : (
-                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                    </svg>
+                    <ShieldCheck className="w-7 h-7" />
                   )}
                   <span className="text-lg">{loading ? "Processing..." : "Submit Vehicle Report"}</span>
                 </button>

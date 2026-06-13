@@ -98,9 +98,7 @@ export default function LostReportForm() {
             
             <div className="relative z-10 flex flex-col items-center">
               <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-4 border border-white/30 shadow-xl">
-                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+                <ShieldCheck className="w-10 h-10 text-white" />
               </div>
               <h2 className="text-4xl font-extrabold text-white tracking-tight">Lost Item Report</h2>
               <p className="text-orange-100 mt-2 font-medium opacity-90">Help us reunite you with your lost belongings</p>
@@ -390,9 +388,7 @@ export default function LostReportForm() {
                   {loading ? (
                     <Loader2 className="w-7 h-7 animate-spin" />
                   ) : (
-                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
+                    <ShieldCheck className="w-7 h-7" />
                   )}
                   <span className="text-lg">{loading ? "Processing..." : "Submit Lost Item Report"}</span>
                 </button>
