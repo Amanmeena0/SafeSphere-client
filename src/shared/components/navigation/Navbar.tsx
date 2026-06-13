@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
-import { SignedOut, SignedIn, UserButton, SignInButton, SignUpButton } from '@clerk/react';
-import { Shield, Menu, X, ArrowRight, Bell, FileText, Sun, Moon } from 'lucide-react';
+import { useAuth, UserButton, SignInButton, SignUpButton } from '@clerk/react';
+import { Shield, Menu, X, ArrowRight, Bell, Sun, Moon } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from "@/shared/hooks/useTheme";
@@ -10,6 +10,7 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const { isSignedIn } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -49,13 +50,7 @@ const Navbar = () => {
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center bg-slate-100/50 dark:bg-slate-800/30 p-1.5 rounded-full border border-slate-200/50 dark:border-slate-700/50 backdrop-blur-sm">
           {navLinks.map((link) => {
-            if (link.protected) {
-              return (
-                <SignedIn key={link.name}>
-                  <NavLink link={link} location={location} />
-                </SignedIn>
-              );
-            }
+            if (link.protected && !isSignedIn) return null;
             return <NavLink key={link.name} link={link} location={location} />;
           })}
         </div>
@@ -70,7 +65,7 @@ const Navbar = () => {
             {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </button>
           
-          <SignedOut>
+          {!isSignedIn ? (
             <div className="hidden md:flex items-center gap-4">
               <SignInButton mode="modal">
                 <button className="text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors">Log in</button>
@@ -81,20 +76,19 @@ const Navbar = () => {
                 </button>
               </SignUpButton>
             </div>
-          </SignedOut>
-          <SignedIn>
+          ) : (
             <div className="flex items-center gap-4">
               <button className="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors relative">
                 <Bell className="w-5 h-5" />
                 <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-[#0B1F3A]"></span>
               </button>
-              <UserButton afterSignOutUrl="/" appearance={{
+              <UserButton appearance={{
                 elements: {
                   avatarBox: "w-10 h-10 border-2 border-white dark:border-[#0B1F3A] shadow-md hover:scale-105 transition-transform"
                 }
               }} />
             </div>
-          </SignedIn>
+          )}
           
           {/* Mobile Menu Toggle */}
           <button 
@@ -118,16 +112,10 @@ const Navbar = () => {
           >
             <div className="flex flex-col gap-6 p-8">
               {navLinks.map((link) => {
-                if (link.protected) {
-                  return (
-                    <SignedIn key={link.name}>
-                      <MobileLink link={link} location={location} onClick={() => setMobileMenuOpen(false)} />
-                    </SignedIn>
-                  );
-                }
+                if (link.protected && !isSignedIn) return null;
                 return <MobileLink key={link.name} link={link} location={location} onClick={() => setMobileMenuOpen(false)} />;
               })}
-              <SignedOut>
+              {!isSignedIn && (
                 <div className="mt-8 flex flex-col gap-4">
                   <SignInButton mode="modal">
                     <button className="text-lg font-bold text-slate-600 text-left">Log in</button>
@@ -138,7 +126,7 @@ const Navbar = () => {
                     </button>
                   </SignUpButton>
                 </div>
-              </SignedOut>
+              )}
             </div>
           </motion.div>
         )}
