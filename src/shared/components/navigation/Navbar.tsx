@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { useAuth, UserButton, SignInButton, SignUpButton } from '@clerk/react';
+import { useAuth, UserButton, SignInButton, SignUpButton } from '@clerk/clerk-react';
 import { Shield, Menu, X, ArrowRight, Bell, Sun, Moon } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';

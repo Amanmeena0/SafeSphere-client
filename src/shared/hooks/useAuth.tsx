@@ -1,4 +1,4 @@
-import { useAuth as useClerkAuth, useUser as useClerkUser } from '@clerk/react';
+import { useAuth as useClerkAuth, useUser as useClerkUser } from '@clerk/clerk-react';
 import { useEffect } from 'react';
 import { setupInterceptors } from '@/lib/apiClient';
 
