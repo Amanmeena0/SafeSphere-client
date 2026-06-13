@@ -271,7 +271,7 @@ export default function LostReportForm() {
                 </h3>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">Upload Supporting Files *</label>
-                  <div className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300 ${formData.documents ? 'border-green-500 bg-green-50 dark:bg-green-900/10' : 'border-slate-300 dark:border-slate-700 hover:border-green-500 dark:hover:border-green-500 bg-white dark:bg-slate-800'}`}>
+                  <div className={`relative border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300 ${formData.documents ? 'border-green-500 bg-green-50 dark:bg-green-900/10' : 'border-slate-300 dark:border-slate-700 hover:border-green-500 dark:hover:border-green-500 bg-white dark:bg-slate-800'}`}>
                     {formData.documents ? (
                       <div className="flex flex-col items-center">
                         <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4">
@@ -301,8 +301,8 @@ export default function LostReportForm() {
                           accept=".pdf,.jpg,.jpeg,.png"
                           required
                         />
-                        <div className="text-center">
-                          <span className="text-green-600 dark:text-green-400 font-bold text-lg hover:underline">Click to upload files</span>
+                        <div className="text-center pointer-events-none">
+                          <span className="text-green-600 dark:text-green-400 font-bold text-lg">Click to upload files</span>
                           <p className="text-slate-500 dark:text-slate-400 text-sm mt-2 font-medium">Images, PDFs up to 10MB</p>
                         </div>
                       </>

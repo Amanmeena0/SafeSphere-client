@@ -1,173 +1,369 @@
 import { useEffect, useState } from "react";
 import apiClient from "@/lib/apiClient";
-import { 
-  FileText, 
-  Calendar, 
-  Tag, 
-  Clock, 
-  AlertCircle, 
-  CheckCircle2, 
+import {
+  FileText,
+  Calendar,
+  Tag,
+  Clock,
+  AlertCircle,
   Info,
-  ChevronRight
+  ChevronRight,
+  Siren,
+  ShieldX,
+  FilePlus,
+  MapPin,
 } from "lucide-react";
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface FirReport {
+  id: string | number;
+  display_type: string;
+  fir_type: string;
+  report_date: string;
+  status?: string;
+}
+
+interface SosReport {
+  id: string | number;
+  created_at: string;
+  latitude?: number;
+  longitude?: number;
+  message?: string;
+  status?: string;
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const typeLabels: Record<string, string> = {
+  cyber_crimes: "Cyber Crime",
+  theft_efirs: "Theft",
+  lost_items: "Lost Item",
+  missing_persons: "Missing Person",
+  domestic_forms: "Domestic Help / Tenant",
+  rape_cases: "Sensitive Case",
+  mv_thefts: "Motor Vehicle Theft",
+};
+
+const getStatusStyle = (status?: string) => {
+  switch (status?.toLowerCase()) {
+    case "pending":
+      return "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700";
+    case "investigating":
+      return "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-700";
+    case "resolved":
+      return "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-700";
+    case "rejected":
+      return "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-700";
+    default:
+      return "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700";
+  }
+};
+
+const getFirIcon = (type: string) => {
+  switch (type?.toLowerCase()) {
+    case "theft_efirs":
+    case "mv_thefts":
+      return <Tag className="w-5 h-5" />;
+    case "cyber_crimes":
+      return <Info className="w-5 h-5" />;
+    default:
+      return <FileText className="w-5 h-5" />;
+  }
+};
+
+const getFirIconBg = (type: string) => {
+  switch (type?.toLowerCase()) {
+    case "theft_efirs":
+    case "mv_thefts":
+      return "bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400";
+    case "cyber_crimes":
+      return "bg-violet-50 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400";
+    case "missing_persons":
+      return "bg-pink-50 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400";
+    default:
+      return "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400";
+  }
+};
+
+// ─── Spinner ─────────────────────────────────────────────────────────────────
+
+function Spinner() {
+  return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="w-12 h-12 rounded-full border-4 border-slate-200 dark:border-slate-700 border-t-blue-600 animate-spin" />
+    </div>
+  );
+}
+
+// ─── Empty State ─────────────────────────────────────────────────────────────
+
+function EmptyState() {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 px-4">
+      {/* Icon */}
+      <div className="relative mb-6">
+        <div className="w-24 h-24 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+          <ShieldX className="w-12 h-12 text-slate-400 dark:text-slate-500" />
+        </div>
+        <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center border-2 border-white dark:border-slate-900">
+          <FilePlus className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+        </div>
+      </div>
+
+      <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
+        No Reports Yet
+      </h3>
+      <p className="text-slate-500 dark:text-slate-400 text-center max-w-sm mb-8">
+        You haven't submitted any E-FIRs or SOS alerts yet. Stay safe and use
+        SafeSphere to report incidents quickly.
+      </p>
+
+      {/* Action cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-lg">
+        <button
+          onClick={() => (window.location.href = "/FirRegister")}
+          className="flex items-center gap-4 p-5 rounded-2xl border-2 border-dashed border-blue-200 dark:border-blue-800 hover:border-blue-400 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all group text-left"
+        >
+          <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <FileText className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+          </div>
+          <div>
+            <p className="font-semibold text-slate-900 dark:text-white text-sm">
+              File an E-FIR
+            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Report a crime online
+            </p>
+          </div>
+        </button>
+
+        <button
+          onClick={() => (window.location.href = "/sos")}
+          className="flex items-center gap-4 p-5 rounded-2xl border-2 border-dashed border-red-200 dark:border-red-800 hover:border-red-400 dark:hover:border-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all group text-left"
+        >
+          <div className="w-12 h-12 rounded-xl bg-red-100 dark:bg-red-900/40 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <Siren className="w-6 h-6 text-red-600 dark:text-red-400" />
+          </div>
+          <div>
+            <p className="font-semibold text-slate-900 dark:text-white text-sm">
+              SOS Emergency
+            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Trigger an SOS alert
+            </p>
+          </div>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
+
 export default function MyReports() {
-  const [reports, setReports] = useState([]);
+  const [firReports, setFirReports] = useState<FirReport[]>([]);
+  const [sosReports, setSosReports] = useState<SosReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    apiClient.get("/api/profile/my-firs")
-      .then(res => {
-        console.log("My Reports API Response:", res.data);
+    const fetchFirs = apiClient
+      .get("/api/profile/my-firs")
+      .then((res) => {
         const rawData = res.data;
-        const flattenedReports = [];
-        
-        // Mapping backend keys to user-friendly labels
-        const typeLabels: { [key: string]: string } = {
-          cyber_crimes: 'Cyber Crime',
-          theft_efirs: 'Theft',
-          lost_items: 'Lost Item',
-          missing_persons: 'Missing Person',
-          domestic_forms: 'Domestic Help/Tenant',
-          rape_cases: 'Sensitive Case',
-          mv_thefts: 'Motor Vehicle Theft'
-        };
+        const flattened: FirReport[] = [];
 
-        // Flatten the dictionary into a single array for the UI
-        Object.keys(rawData).forEach(key => {
+        Object.keys(rawData).forEach((key) => {
           if (Array.isArray(rawData[key])) {
             rawData[key].forEach((report: any) => {
-              flattenedReports.push({
+              flattened.push({
                 ...report,
-                id: report.id || report.auth_id, // Normalize ID field
+                id: report.id || report.auth_id,
                 display_type: typeLabels[key] || key,
-                fir_type: key, // Keep original key for icons/styling
-                // Use the most relevant date field available for display/sorting
-                report_date: report.created_at || 
-                             report.registration_date || 
-                             report.date_of_incident || 
-                             report.date_of_theft || 
-                             report.loss_datetime || 
-                             report.datetimelastseen || 
-                             new Date().toISOString()
+                fir_type: key,
+                report_date:
+                  report.created_at ||
+                  report.registration_date ||
+                  report.date_of_incident ||
+                  report.date_of_theft ||
+                  report.loss_datetime ||
+                  report.datetimelastseen ||
+                  new Date().toISOString(),
               });
             });
           }
         });
 
-        // Sort by date (newest first)
-        flattenedReports.sort((a, b) => new Date(b.report_date).getTime() - new Date(a.report_date).getTime());
-        
-        setReports(flattenedReports);
-        setLoading(false);
+        flattened.sort(
+          (a, b) =>
+            new Date(b.report_date).getTime() -
+            new Date(a.report_date).getTime()
+        );
+        setFirReports(flattened);
       })
-      .catch(err => {
-        console.error("Failed to fetch reports", err);
-        setError("Failed to load your reports. Please try again later.");
-        setReports([]);
-        setLoading(false);
+      .catch(() => {
+        setError("Failed to load your FIR reports. Please try again later.");
       });
+
+    const fetchSos = apiClient
+      .get("/api/profile/my-sos")
+      .then((res) => {
+        const data = Array.isArray(res.data) ? res.data : [];
+        setSosReports(data);
+      })
+      .catch(() => {
+        // SOS endpoint might not exist yet — fail silently
+        setSosReports([]);
+      });
+
+    Promise.all([fetchFirs, fetchSos]).finally(() => setLoading(false));
   }, []);
 
-  const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'investigating': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'resolved': return 'bg-green-100 text-green-800 border-green-200';
-      case 'rejected': return 'bg-red-100 text-red-800 border-red-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
+  if (loading) return <Spinner />;
 
-  const getIcon = (type) => {
-    switch (type?.toLowerCase()) {
-      case 'theft_efirs':
-      case 'mv_thefts': return <Tag className="w-5 h-5" />;
-      case 'cyber_crimes': return <Info className="w-5 h-5" />;
-      default: return <FileText className="w-5 h-5" />;
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
+  const totalReports = firReports.length + sosReports.length;
+  const hasNoReports = totalReports === 0 && !error;
 
   return (
-    <div className="max-w-5xl mx-auto py-8 px-4">
+    <div className="max-w-5xl mx-auto py-10 px-4">
+      {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">My Reports</h1>
-          <p className="text-gray-500 mt-1">Track the status of your submitted E-FIRs and complaints</p>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+            My Reports
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">
+            Track your submitted E-FIRs and SOS alerts
+          </p>
         </div>
-        <div className="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg border border-blue-100 text-sm font-medium">
-          Total Reports: {reports.length}
-        </div>
+        {!hasNoReports && (
+          <div className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-4 py-2 rounded-xl border border-blue-100 dark:border-blue-800 text-sm font-semibold">
+            {totalReports} Total Report{totalReports !== 1 ? "s" : ""}
+          </div>
+        )}
       </div>
 
+      {/* API Error Banner */}
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center space-x-3 text-red-700">
-          <AlertCircle className="w-5 h-5" />
+        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl flex items-center gap-3 text-red-700 dark:text-red-400">
+          <AlertCircle className="w-5 h-5 shrink-0" />
           <p>{error}</p>
         </div>
       )}
 
-      {reports.length === 0 && !error ? (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
-          <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-            <FileText className="w-8 h-8 text-gray-400" />
+      {/* ── Empty State ── */}
+      {hasNoReports && <EmptyState />}
+
+      {/* ── FIR Reports Section ── */}
+      {firReports.length > 0 && (
+        <section className="mb-10">
+          <div className="flex items-center gap-2 mb-4">
+            <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <h2 className="text-lg font-bold text-slate-800 dark:text-white">
+              E-FIR Reports
+            </h2>
+            <span className="ml-auto text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">
+              {firReports.length}
+            </span>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900">No reports found</h3>
-          <p className="text-gray-500 mt-2">You haven't submitted any E-FIRs yet.</p>
-          <button 
-            onClick={() => window.location.href = '/FirRegister'}
-            className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            File a New Report
-          </button>
-        </div>
-      ) : (
-        <div className="grid gap-4">
-          {reports.map((report: any) => (
-            <div 
-              key={`${report.fir_type}-${report.id}`} 
-              className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow cursor-pointer group"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className={`p-3 rounded-lg ${report.fir_type.includes('theft') ? 'bg-orange-50 text-orange-600' : 'bg-purple-50 text-purple-600'}`}>
-                    {getIcon(report.fir_type)}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors capitalize">
-                      {report.display_type}
-                    </h3>
-                    <div className="flex items-center space-x-4 mt-1 text-sm text-gray-500">
-                      <span className="flex items-center">
-                        <Calendar className="w-3.5 h-3.5 mr-1" />
-                        {new Date(report.report_date).toLocaleDateString()}
-                      </span>
-                      <span className="flex items-center">
-                        <Clock className="w-3.5 h-3.5 mr-1" />
-                        ID: {report.id}
-                      </span>
+
+          <div className="grid gap-3">
+            {firReports.map((report) => (
+              <div
+                key={`fir-${report.fir_type}-${report.id}`}
+                className="bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 p-5 hover:shadow-md hover:border-blue-100 dark:hover:border-blue-900 transition-all cursor-pointer group"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div
+                      className={`p-3 rounded-xl ${getFirIconBg(report.fir_type)}`}
+                    >
+                      {getFirIcon(report.fir_type)}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        {report.display_type}
+                      </h3>
+                      <div className="flex items-center gap-4 mt-1 text-xs text-slate-500 dark:text-slate-400">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3.5 h-3.5" />
+                          {new Date(report.report_date).toLocaleDateString()}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5" />
+                          ID: {report.id}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(report.status)}`}>
-                    {report.status || 'Pending'}
-                  </span>
-                  <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-blue-500 transition-colors" />
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusStyle(report.status)}`}
+                    >
+                      {report.status || "Pending"}
+                    </span>
+                    <ChevronRight className="w-5 h-5 text-slate-300 dark:text-slate-600 group-hover:text-blue-500 transition-colors" />
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ── SOS Reports Section ── */}
+      {sosReports.length > 0 && (
+        <section>
+          <div className="flex items-center gap-2 mb-4">
+            <Siren className="w-5 h-5 text-red-600 dark:text-red-400" />
+            <h2 className="text-lg font-bold text-slate-800 dark:text-white">
+              SOS Alerts
+            </h2>
+            <span className="ml-auto text-xs font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">
+              {sosReports.length}
+            </span>
+          </div>
+
+          <div className="grid gap-3">
+            {sosReports.map((sos) => (
+              <div
+                key={`sos-${sos.id}`}
+                className="bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 p-5 hover:shadow-md hover:border-red-100 dark:hover:border-red-900 transition-all group"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-xl bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400">
+                      <Siren className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-900 dark:text-white">
+                        {sos.message || "Emergency SOS Alert"}
+                      </h3>
+                      <div className="flex items-center gap-4 mt-1 text-xs text-slate-500 dark:text-slate-400">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3.5 h-3.5" />
+                          {new Date(sos.created_at).toLocaleDateString()}
+                        </span>
+                        {sos.latitude && sos.longitude && (
+                          <span className="flex items-center gap-1">
+                            <MapPin className="w-3.5 h-3.5" />
+                            {sos.latitude.toFixed(4)}, {sos.longitude.toFixed(4)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusStyle(sos.status)}`}
+                  >
+                    {sos.status || "Sent"}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
       )}
     </div>
   );
