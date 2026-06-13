@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useSubmitFir } from "../hooks/useSubmitFir";
-import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2, ShieldCheck } from "lucide-react";
 
 export default function DomesticTenantForm() {
   const [formData, setFormData] = useState<any>({});
