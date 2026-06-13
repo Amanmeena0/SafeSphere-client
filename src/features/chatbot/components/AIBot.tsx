@@ -10,7 +10,8 @@ import {
   Trash2, 
   Copy, 
   Check, 
-  Info
+  Info,
+  Sparkles
 } from "lucide-react";
 
 export default function Chatbot({ onClose }: any) {
@@ -64,159 +65,239 @@ export default function Chatbot({ onClose }: any) {
     "Emergency contacts"
   ];
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 15, scale: 0.95 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      scale: 1,
+      transition: { type: "spring", stiffness: 400, damping: 28 }
+    }
+  };
+
   return (
-    <div className="w-[90vw] max-w-md h-[600px] max-h-[80vh] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden">
+    <div className="w-[90vw] max-w-md h-[600px] max-h-[80vh] bg-white/95 backdrop-blur-xl rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-white/20 flex flex-col overflow-hidden relative">
+      {/* Decorative background elements */}
+      <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-blue-50/50 to-transparent pointer-events-none"></div>
+      
       {/* Header */}
-      <div className="bg-blue-600 px-4 py-3 flex justify-between items-center shadow-md">
+      <motion.div 
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 px-6 py-5 flex justify-between items-center shadow-lg relative z-10"
+      >
         <div className="flex items-center gap-3">
           <div className="relative">
-            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-blue-600 shadow-sm">
-              <Bot size={24} />
-            </div>
-            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+            <motion.div 
+              whileHover={{ rotate: 15, scale: 1.1 }}
+              className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center text-white shadow-inner border border-white/30"
+            >
+              <Bot size={28} />
+            </motion.div>
+            <motion.div 
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ repeat: Infinity, duration: 2 }}
+              className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 border-2 border-white rounded-full shadow-sm"
+            ></motion.div>
           </div>
           <div>
-            <h2 className="text-white font-bold leading-tight">Surkhsha AI</h2>
-            <p className="text-blue-100 text-xs flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
-              Online Assistant
+            <div className="flex items-center gap-2">
+              <h2 className="text-white font-bold text-lg tracking-tight">Surkhsha AI</h2>
+              <Sparkles size={14} className="text-blue-200 animate-pulse" />
+            </div>
+            <p className="text-blue-100 text-[11px] font-medium flex items-center gap-1.5 uppercase tracking-wider">
+              <span className="w-2 h-2 bg-green-400 rounded-full"></span>
+              Always here to help
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button 
+        <div className="flex items-center gap-1">
+          <motion.button 
+            whileHover={{ scale: 1.1, backgroundColor: "rgba(255, 255, 255, 0.15)" }}
+            whileTap={{ scale: 0.9 }}
             onClick={clearChat}
-            className="p-1.5 text-blue-100 hover:text-white hover:bg-blue-500 rounded-lg transition-colors"
+            className="p-2 text-blue-100 hover:text-white rounded-xl transition-all"
             title="Clear chat"
           >
-            <Trash2 size={18} />
-          </button>
-          <button 
+            <Trash2 size={20} />
+          </motion.button>
+          <motion.button 
+            whileHover={{ scale: 1.1, backgroundColor: "rgba(255, 255, 255, 0.15)" }}
+            whileTap={{ scale: 0.9 }}
             onClick={onClose}
-            className="p-1.5 text-blue-100 hover:text-white hover:bg-blue-500 rounded-lg transition-colors"
+            className="p-2 text-blue-100 hover:text-white rounded-xl transition-all"
           >
-            <X size={20} />
-          </button>
+            <X size={22} />
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Messages Area */}
-      <div className="flex-grow overflow-y-auto p-4 space-y-4 bg-gray-50/50">
-        {messages.map((msg, idx) => (
-          <motion.div
-            key={idx}
-            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
-          >
-            <div className={`flex gap-2 max-w-[85%] ${msg.sender === "user" ? "flex-row-reverse" : "flex-row"}`}>
-              <div className={`mt-auto w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-sm ${
-                msg.sender === "user" ? "bg-blue-100 text-blue-600" : "bg-gray-200 text-gray-600"
-              }`}>
-                {msg.sender === "user" ? <User size={16} /> : <Bot size={16} />}
-              </div>
-              
-              <div className="flex flex-col gap-1">
-                <div className={`relative px-4 py-2.5 rounded-2xl shadow-sm text-sm group ${
-                  msg.sender === "user"
-                    ? "bg-blue-600 text-white rounded-tr-none"
-                    : "bg-white text-gray-800 border border-gray-100 rounded-tl-none"
-                }`}>
-                  {msg.text}
-                  
-                  {msg.sender === "bot" && (
-                    <button 
-                      onClick={() => copyToClipboard(msg.text, idx)}
-                      className="absolute -right-8 top-0 p-1 text-gray-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity"
-                      title="Copy message"
-                    >
-                      {copiedIndex === idx ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
-                    </button>
-                  )}
+      <motion.div 
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="flex-grow overflow-y-auto p-5 space-y-6 bg-transparent relative z-0 scrollbar-hide"
+      >
+        <AnimatePresence initial={false}>
+          {messages.map((msg, idx) => (
+            <motion.div
+              key={`${idx}-${msg.timestamp}`}
+              variants={itemVariants}
+              layout
+              className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
+            >
+              <div className={`flex gap-3 max-w-[88%] ${msg.sender === "user" ? "flex-row-reverse" : "flex-row"}`}>
+                <motion.div 
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className={`mt-auto w-9 h-9 rounded-xl flex items-center justify-center shrink-0 shadow-md ${
+                    msg.sender === "user" 
+                      ? "bg-blue-600 text-white" 
+                      : "bg-white border border-gray-100 text-indigo-600"
+                  }`}
+                >
+                  {msg.sender === "user" ? <User size={18} /> : <Bot size={18} />}
+                </motion.div>
+                
+                <div className={`flex flex-col gap-1.5 ${msg.sender === "user" ? "items-end" : "items-start"}`}>
+                  <motion.div 
+                    layoutId={`bubble-${idx}`}
+                    className={`relative px-4 py-3 rounded-2xl shadow-[0_2px_15px_rgba(0,0,0,0.05)] text-sm group transition-all duration-300 ${
+                      msg.sender === "user"
+                        ? "bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-tr-none"
+                        : "bg-white text-gray-800 border border-gray-100 rounded-tl-none hover:border-blue-100"
+                    }`}
+                  >
+                    <p className="leading-relaxed">{msg.text}</p>
+                    
+                    {msg.sender === "bot" && (
+                      <motion.button 
+                        initial={{ opacity: 0 }}
+                        whileHover={{ scale: 1.1 }}
+                        className="absolute -right-9 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-all bg-white rounded-lg shadow-sm border border-gray-100"
+                        onClick={() => copyToClipboard(msg.text, idx)}
+                        title="Copy message"
+                      >
+                        {copiedIndex === idx ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
+                      </motion.button>
+                    )}
+                  </motion.div>
+                  <span className="text-[10px] font-medium text-gray-400 px-1">
+                    {msg.timestamp}
+                  </span>
                 </div>
-                <span className={`text-[10px] text-gray-400 ${msg.sender === "user" ? "text-right" : "text-left"}`}>
-                  {msg.timestamp}
-                </span>
               </div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          ))}
+        </AnimatePresence>
+        
         {loading && (
           <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex justify-start items-center gap-2"
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex justify-start items-center gap-3"
           >
-            <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-600">
-              <Bot size={16} />
+            <div className="w-9 h-9 bg-white border border-gray-100 rounded-xl flex items-center justify-center text-indigo-600 shadow-sm">
+              <Bot size={18} />
             </div>
-            <div className="bg-white border border-gray-100 px-4 py-2.5 rounded-2xl rounded-tl-none shadow-sm">
-              <div className="flex gap-1">
-                <motion.span 
-                  animate={{ opacity: [0.4, 1, 0.4] }} 
-                  transition={{ repeat: Infinity, duration: 1.5, delay: 0 }}
-                  className="w-1.5 h-1.5 bg-gray-400 rounded-full"
-                ></motion.span>
-                <motion.span 
-                  animate={{ opacity: [0.4, 1, 0.4] }} 
-                  transition={{ repeat: Infinity, duration: 1.5, delay: 0.2 }}
-                  className="w-1.5 h-1.5 bg-gray-400 rounded-full"
-                ></motion.span>
-                <motion.span 
-                  animate={{ opacity: [0.4, 1, 0.4] }} 
-                  transition={{ repeat: Infinity, duration: 1.5, delay: 0.4 }}
-                  className="w-1.5 h-1.5 bg-gray-400 rounded-full"
-                ></motion.span>
+            <div className="bg-white border border-gray-100 px-5 py-3 rounded-2xl rounded-tl-none shadow-sm">
+              <div className="flex gap-2 items-center h-4">
+                {[0, 0.15, 0.3].map((delay) => (
+                  <motion.span 
+                    key={delay}
+                    animate={{ 
+                      scale: [1, 1.4, 1],
+                      backgroundColor: ["#cbd5e1", "#4f46e5", "#cbd5e1"]
+                    }} 
+                    transition={{ 
+                      repeat: Infinity, 
+                      duration: 1, 
+                      delay 
+                    }}
+                    className="w-2 h-2 rounded-full"
+                  />
+                ))}
               </div>
             </div>
           </motion.div>
         )}
         <div ref={messagesEndRef} />
-      </div>
+      </motion.div>
 
       {/* Suggested Questions */}
-      {messages.length < 3 && !loading && (
-        <div className="px-4 py-2 bg-gray-50/50 flex flex-wrap gap-2">
-          {suggestedQuestions.map((q, i) => (
-            <button
-              key={i}
-              onClick={() => sendMessage(q)}
-              className="text-xs bg-white border border-blue-200 text-blue-600 px-3 py-1.5 rounded-full hover:bg-blue-50 transition-colors shadow-sm"
-            >
-              {q}
-            </button>
-          ))}
-        </div>
-      )}
+      <AnimatePresence>
+        {messages.length < 3 && !loading && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="px-5 py-3 flex flex-wrap gap-2 relative z-10"
+          >
+            {suggestedQuestions.map((q, i) => (
+              <motion.button
+                key={i}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.2 + i * 0.1 }}
+                whileHover={{ scale: 1.05, y: -2, backgroundColor: "#f8fafc", borderColor: "#3b82f6" }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => sendMessage(q)}
+                className="text-[11px] font-semibold bg-white/80 backdrop-blur-sm border border-gray-200 text-blue-600 px-4 py-2 rounded-xl shadow-sm transition-all"
+              >
+                {q}
+              </motion.button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Input Area */}
-      <div className="p-4 border-t border-gray-100 bg-white">
-        <div className="relative flex items-center gap-2">
+      <motion.div 
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="p-5 bg-white border-t border-gray-100/50 relative z-10"
+      >
+        <div className="relative flex items-center gap-3 bg-gray-50 p-1.5 rounded-[1.25rem] border border-gray-100 focus-within:border-blue-200 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-500/5 transition-all duration-300">
           <textarea
-            rows="1"
+            rows={1}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Type your message..."
-            className="w-full pl-4 pr-12 py-3 bg-gray-100 border-none rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all outline-none resize-none text-sm"
+            placeholder="How can Surkhsha help you?"
+            className="flex-grow pl-3 pr-10 py-3 bg-transparent border-none outline-none resize-none text-sm font-medium text-gray-700 placeholder:text-gray-400"
           />
-          <button
-            onClick={() => sendMessage()}
+          <motion.button
+            whileHover={{ scale: 1.05, x: 2 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => handleSend()}
             disabled={loading || !input.trim()}
-            className={`absolute right-1.5 p-2 rounded-lg transition-all ${
+            className={`absolute right-2 p-3 rounded-2xl shadow-lg transition-all ${
               loading || !input.trim() 
-                ? "text-gray-400 cursor-not-allowed" 
-                : "text-blue-600 hover:bg-blue-50"
+                ? "bg-gray-200 text-gray-400 cursor-not-allowed shadow-none" 
+                : "bg-gradient-to-br from-blue-600 to-indigo-600 text-white hover:shadow-blue-500/25"
             }`}
           >
-            {loading ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
-          </button>
+            {loading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+          </motion.button>
         </div>
-        <p className="text-[10px] text-center text-gray-400 mt-2 flex items-center justify-center gap-1">
-          <Info size={10} />
-          Surkhsha AI can make mistakes. Check important info.
-        </p>
-      </div>
+        <div className="mt-3 flex items-center justify-center gap-2">
+          <div className="h-[1px] w-4 bg-gray-100"></div>
+          <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
+            <Info size={10} className="text-blue-400" />
+            AI Assistant by SafeSphere
+          </p>
+          <div className="h-[1px] w-4 bg-gray-100"></div>
+        </div>
+      </motion.div>
     </div>
   );
 }
