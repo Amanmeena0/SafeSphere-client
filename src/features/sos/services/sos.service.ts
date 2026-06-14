@@ -12,13 +12,15 @@ export const sosService = {
     top: number = 3
   ): Promise<PoliceStation[]> => {
     const res = await apiClient.get<PoliceStation[]>(
-      `/api/search/police-stations?lat=${lat}&lon=${lon}&top=${top}`
+      `/api/police/stations?lat=${lat}&lon=${lon}&top=${top}`
     );
     return res.data;
   },
 
   getCrimeData: async (): Promise<CrimeData[]> => {
-    const res = await apiClient.get<CrimeData[]>("/api/crime-data");
+    const res = await apiClient.get<CrimeData[]>("/api/search", {
+      params: { limit: 100 }
+    });
     return Array.isArray(res.data) ? res.data : [];
   },
 };

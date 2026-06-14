@@ -207,7 +207,7 @@ export default function MyReports() {
       });
 
     const fetchSos = apiClient
-      .get("/api/profile/my-sos")
+      .get("/api/profile/sos")
       .then((res) => {
         const data = Array.isArray(res.data) ? res.data : [];
         setSosReports(data);
