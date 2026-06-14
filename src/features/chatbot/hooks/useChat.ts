@@ -11,6 +11,28 @@ export const useChat = (initialMessages: Message[] = []) => {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [loading, setLoading] = useState(false);
 
+  const pollStatus = (taskId: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const interval = setInterval(async () => {
+        try {
+          const data = await botService.getTaskStatus(taskId);
+          
+          if (data.status === 'SUCCESS') {
+            clearInterval(interval);
+            resolve(data.result || "I'm sorry, I couldn't generate a response.");
+          } else if (data.status === 'FAILURE') {
+            clearInterval(interval);
+            reject(new Error('Bot failed to generate an answer.'));
+          }
+          // If status is PENDING, we just wait for the next interval
+        } catch (error) {
+          clearInterval(interval);
+          reject(error);
+        }
+      }, 1500); // Poll every 1.5 seconds
+    });
+  };
+
   const sendMessage = async (text: string) => {
     const messageText = text.trim();
     if (!messageText) return;
@@ -25,14 +47,20 @@ export const useChat = (initialMessages: Message[] = []) => {
     setLoading(true);
 
     try {
-      const data = await botService.sendMessage(messageText);
+      // 1. Submit Query
+      const { task_id } = await botService.generateAnswer(messageText);
+
+      // 2. Poll for Results
+      const resultText = await pollStatus(task_id);
+
       const botMessage: Message = {
         sender: "bot",
-        text: data.result || "No response received.",
+        text: resultText,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
+      console.error('Chatbot error:', error);
       setMessages((prev) => [
         ...prev,
         {
