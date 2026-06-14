@@ -76,12 +76,15 @@ export const useCrimeAnalytics = () => {
   const handleSearch = async (searchFilters: Partial<StatisticsFilters>) => {
     setLoading(true);
     try {
-      if (searchFilters.state !== undefined) {
-        const result = await statisticsService.searchCrimeData(searchFilters.state);
-        setData(result);
-        // Reset filters when a new search is performed, or update with searchFilters
-        setFilters(prev => ({ ...prev, ...searchFilters }));
-      }
+      const params: any = { limit: 100 };
+      if (searchFilters.state) params.state_ut = searchFilters.state;
+      if (searchFilters.district) params.district = searchFilters.district;
+      if (searchFilters.year) params.year = parseInt(searchFilters.year);
+      
+      const result = await statisticsService.searchCrimeData(params);
+      setData(result);
+      // Update filters with searchFilters
+      setFilters(prev => ({ ...prev, ...searchFilters }));
     } catch (error) {
       console.error("Error fetching data:", error);
       setData([]);

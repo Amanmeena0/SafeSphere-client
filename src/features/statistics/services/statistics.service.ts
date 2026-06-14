@@ -1,10 +1,13 @@
 import apiClient from '@/lib/apiClient';
-import { CrimeData } from '../types/statistics.types';
+import { CrimeData, SearchParams } from '../types/statistics.types';
 
 export const statisticsService = {
-  searchCrimeData: async (state_ut: string): Promise<CrimeData[]> => {
+  /**
+   * Fetches crime data based on filters
+   */
+  searchCrimeData: async (params: SearchParams): Promise<CrimeData[]> => {
     const response = await apiClient.get<CrimeData[]>('/api/search', {
-      params: { state_ut },
+      params,
     });
     return response.data;
   },

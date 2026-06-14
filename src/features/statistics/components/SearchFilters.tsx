@@ -9,7 +9,11 @@ const SearchFilters = ({ onSearch, onFilterChange, loading, filters }) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
     const handleSearch = () => {
-        onSearch({ state: searchState });
+        onSearch({ 
+            state: searchState,
+            year: localFilters.year,
+            district: localFilters.district
+        });
     };
 
     const handleFilterChange = (key, value) => {

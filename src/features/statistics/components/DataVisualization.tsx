@@ -10,10 +10,12 @@ import {
     Title,
     Tooltip,
     Legend,
+    ChartOptions,
 } from 'chart.js';
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { PieChart, BarChart, TrendingUp, Shield } from 'lucide-react';
+import { CrimeData } from '../types/statistics.types';
 
 ChartJS.register(
     CategoryScale,
@@ -27,17 +29,30 @@ ChartJS.register(
     Legend
 );
 
-const DataVisualization = ({ data }) => {
+interface DataVisualizationProps {
+    data: CrimeData[];
+}
+
+const DataVisualization = ({ data }: DataVisualizationProps) => {
     const getCrimeTypeData = () => {
-        const crimeTypes = {};
+        const crimeTypes: Record<string, number> = {
+            murder: 0,
+            rape: 0,
+            kidnapping: 0,
+            robbery: 0,
+            burglary: 0,
+            theft: 0,
+            riots: 0
+        };
+
         data.forEach(item => {
-            crimeTypes.murder = (crimeTypes.murder || 0) + (item.murder || 0);
-            crimeTypes.rape = (crimeTypes.rape || 0) + (item.rape || 0);
-            crimeTypes.kidnapping = (crimeTypes.kidnapping || 0) + (item.kidnapping_abduction || 0);
-            crimeTypes.robbery = (crimeTypes.robbery || 0) + (item.robbery || 0);
-            crimeTypes.burglary = (crimeTypes.burglary || 0) + (item.burglary || 0);
-            crimeTypes.theft = (crimeTypes.theft || 0) + (item.theft || 0);
-            crimeTypes.riots = (crimeTypes.riots || 0) + (item.riots || 0);
+            crimeTypes.murder += (item.murder || 0);
+            crimeTypes.rape += (item.rape || 0);
+            crimeTypes.kidnapping += (item.kidnapping_abduction || 0);
+            crimeTypes.robbery += (item.robbery || 0);
+            crimeTypes.burglary += (item.burglary || 0);
+            crimeTypes.theft += (item.theft || 0);
+            crimeTypes.riots += (item.riots || 0);
         });
 
         return {
@@ -56,7 +71,7 @@ const DataVisualization = ({ data }) => {
     };
 
     const getStateWiseData = () => {
-        const stateData = {};
+        const stateData: Record<string, number> = {};
         data.forEach(item => {
             stateData[item.state_ut] = (stateData[item.state_ut] || 0) + (item.total_ipc_crimes || 0);
         });
@@ -79,12 +94,12 @@ const DataVisualization = ({ data }) => {
     };
 
     const getYearlyTrend = () => {
-        const yearData = {};
+        const yearData: Record<number, number> = {};
         data.forEach(item => {
             yearData[item.year] = (yearData[item.year] || 0) + (item.total_ipc_crimes || 0);
         });
 
-        const sortedYears = Object.entries(yearData).sort((a, b) => a[0] - b[0]);
+        const sortedYears = Object.entries(yearData).sort((a, b) => Number(a[0]) - Number(b[0]));
 
         return {
             labels: sortedYears.map(([year]) => year),
@@ -102,7 +117,7 @@ const DataVisualization = ({ data }) => {
         };
     };
 
-    const chartOptions = {
+    const chartOptions: any = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {

@@ -1,4 +1,5 @@
 export interface CrimeData {
+  id: number;
   state_ut: string;
   district: string;
   year: number;
@@ -7,6 +8,13 @@ export interface CrimeData {
   rape?: number;
   theft?: number;
   [key: string]: string | number | undefined;
+}
+
+export interface SearchParams {
+  state_ut?: string;
+  district?: string;
+  year?: number;
+  limit?: number;
 }
 
 export interface StatisticsFilters {

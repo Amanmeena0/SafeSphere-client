@@ -15,6 +15,7 @@ import {
 import PropTypes from 'prop-types';
 import { motion } from 'framer-motion';
 import { Brain, ShieldAlert, TrendingUp, Target } from 'lucide-react';
+import { CrimeData } from '../types/statistics.types';
 
 ChartJS.register(
     CategoryScale,
@@ -29,9 +30,13 @@ ChartJS.register(
     Filler
 );
 
-const CrimeAnalytics = ({ data }) => {
+interface CrimeAnalyticsProps {
+    data: CrimeData[];
+}
+
+const CrimeAnalytics = ({ data }: CrimeAnalyticsProps) => {
     const getGenderBasedCrimes = () => {
-        const genderCrimes = {
+        const genderCrimes: Record<string, number> = {
             rape: 0,
             dowry_deaths: 0,
             assault_on_women_with_intent_to_outrage_her_modesty: 0,
@@ -41,7 +46,7 @@ const CrimeAnalytics = ({ data }) => {
 
         data.forEach(item => {
             Object.keys(genderCrimes).forEach(crime => {
-                genderCrimes[crime] += item[crime] || 0;
+                genderCrimes[crime] += (item[crime] as number) || 0;
             });
         });
 
@@ -63,11 +68,15 @@ const CrimeAnalytics = ({ data }) => {
     };
 
     const getCrimeSeverityData = () => {
-        const severityData = {};
+        const severityData: Record<string, number> = {
+            highSeverity: 0,
+            mediumSeverity: 0,
+            lowSeverity: 0
+        };
         data.forEach(item => {
-            severityData.highSeverity = (severityData.highSeverity || 0) + (item.murder || 0) + (item.rape || 0) + (item.kidnapping_abduction || 0);
-            severityData.mediumSeverity = (severityData.mediumSeverity || 0) + (item.robbery || 0) + (item.burglary || 0) + (item.riots || 0);
-            severityData.lowSeverity = (severityData.lowSeverity || 0) + (item.theft || 0) + (item.cheating || 0) + (item.counterfeiting || 0);
+            severityData.highSeverity += (item.murder || 0) + (item.rape || 0) + (item.kidnapping_abduction as number || 0);
+            severityData.mediumSeverity += (item.robbery as number || 0) + (item.burglary as number || 0) + (item.riots as number || 0);
+            severityData.lowSeverity += (item.theft || 0) + (item.cheating as number || 0) + (item.counterfeiting as number || 0);
         });
 
         return {
@@ -88,13 +97,13 @@ const CrimeAnalytics = ({ data }) => {
     };
 
     const getDistrictAnalysis = () => {
-        const districtData = {};
+        const districtData: Record<string, any> = {};
         data.forEach(item => {
             const key = `${item.district}-${item.state_ut}`;
             if (!districtData[key]) {
                 districtData[key] = {
                     x: item.total_ipc_crimes || 0,
-                    y: (item.murder || 0) + (item.rape || 0) + (item.kidnapping_abduction || 0),
+                    y: (item.murder || 0) + (item.rape || 0) + (item.kidnapping_abduction as number || 0),
                     label: item.district
                 };
             }
@@ -111,7 +120,7 @@ const CrimeAnalytics = ({ data }) => {
         };
     };
 
-    const radarOptions = {
+    const radarOptions: any = {
         responsive: true,
         maintainAspectRatio: false,
         scales: {
@@ -126,7 +135,7 @@ const CrimeAnalytics = ({ data }) => {
         plugins: { legend: { display: false } }
     };
 
-    const chartOptions = {
+    const chartOptions: any = {
         responsive: true,
         maintainAspectRatio: false,
         scales: {
