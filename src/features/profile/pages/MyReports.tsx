@@ -169,7 +169,7 @@ export default function MyReports() {
 
   useEffect(() => {
     const fetchFirs = apiClient
-      .get("/api/profile/my-firs")
+      .get("/api/profile/firs")
       .then((res) => {
         const rawData = res.data;
         const flattened: FirReport[] = [];
