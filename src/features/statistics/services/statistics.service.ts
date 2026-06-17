@@ -72,7 +72,7 @@ export const statisticsService = {
   searchCrimeData: async (params: SearchParams): Promise<CrimeData[]> => {
     try {
       // Primary: Try fetching from the backend API
-      const response = await apiClient.get<CrimeData[]>('/api/search', {
+      const response = await apiClient.get<CrimeData[]>('/api/crime/search', {
         params,
       });
       

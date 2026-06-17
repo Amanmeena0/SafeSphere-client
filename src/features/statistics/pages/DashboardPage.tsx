@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { 
   BarChart3, 
   PieChart, 
@@ -21,12 +21,12 @@ import TrendAnalysis from '../components/TrendAnalysis';
 import useCrimeAnalytics from '../hooks/useCrimeAnalytics';
 import '../components/enhanced-dashboard.css';
 
-const fadeUpVariant = {
+const fadeUpVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
 };
 
-const staggerContainer = {
+const staggerContainerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
 };
@@ -80,11 +80,11 @@ const EnhancedStatisticalDashboard = () => {
                 <motion.div 
                     initial="hidden"
                     animate="visible"
-                    variants={staggerContainer}
+                    variants={staggerContainerVariants}
                     className="mb-12"
                 >
                     <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-8 pb-8 border-b border-slate-200 dark:border-slate-800">
-                        <motion.div variants={fadeUpVariant} className="flex-1">
+                        <motion.div variants={fadeUpVariants} className="flex-1">
                             <div className="flex items-center gap-3 mb-4">
                                 <div className="px-3 py-1 bg-blue-500/10 border border-blue-500/20 rounded-full flex items-center gap-2">
                                     <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
@@ -103,7 +103,7 @@ const EnhancedStatisticalDashboard = () => {
                             </p>
                         </motion.div>
 
-                        <motion.div variants={fadeUpVariant} className="flex flex-wrap items-center gap-4">
+                        <motion.div variants={fadeUpVariants} className="flex flex-wrap items-center gap-4">
                             <div className="hidden xl:flex items-center gap-6 px-6 py-3 bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm backdrop-blur-md">
                                 <div className="text-center">
                                     <div className="text-[10px] font-bold uppercase text-slate-500 mb-1">Active Regions</div>
@@ -131,7 +131,7 @@ const EnhancedStatisticalDashboard = () => {
                 <motion.div
                     initial="hidden"
                     animate="visible"
-                    variants={fadeUpVariant}
+                    variants={fadeUpVariants}
                     className="mb-10"
                 >
                     <SearchFilters 

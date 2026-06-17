@@ -97,7 +97,7 @@ export const sosService = {
     top: number = 3
   ): Promise<PoliceStation[]> => {
     const res = await apiClient.get<PoliceStation[]>(
-      `/api/police/stations?lat=${lat}&lon=${lon}&top=${top}`
+      `/api/police/stations/nearest?lat=${lat}&lon=${lon}&top=${top}`
     );
     return res.data;
   },
@@ -105,7 +105,7 @@ export const sosService = {
   getCrimeData: async (): Promise<CrimeData[]> => {
     try {
       // Primary: Fetch from the backend API
-      const res = await apiClient.get<any[]>("/api/search", {
+      const res = await apiClient.get<any[]>("/api/crime/clusters", {
         params: { limit: 200 }
       });
       
