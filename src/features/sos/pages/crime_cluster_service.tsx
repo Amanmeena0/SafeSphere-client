@@ -38,7 +38,7 @@ const staggerContainer = {
 const CrimeMap = () => {
   const { crimeData, isLoading, error } = useCrimeClusters();
   const [filteredData, setFilteredData] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchInput, setSearchInput] = useState("");
 
   // Filter states
   const [incidentTypeFilter, setIncidentTypeFilter] = useState("");
@@ -46,24 +46,20 @@ const CrimeMap = () => {
   const [stateFilter, setStateFilter] = useState("");
   const [yearFilter, setYearFilter] = useState("");
 
-  useEffect(() => {
-    if (crimeData) {
-      setFilteredData(crimeData);
-    }
-  }, [crimeData]);
-
   // Extract unique values for dropdowns
   const getUniqueValues = (key) => {
     return [...new Set(crimeData.map((item) => item[key]).filter(Boolean))].sort();
   };
 
-  const filterData = useCallback(() => {
+  const handleSearch = useCallback(() => {
+    if (!crimeData) return;
+    
     let filtered = crimeData.filter((item) =>
-      item.incident_type?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.state?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.summary?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (item.year && item.year.toString().includes(searchQuery))
+      item.incident_type?.toLowerCase().includes(searchInput.toLowerCase()) ||
+      item.city?.toLowerCase().includes(searchInput.toLowerCase()) ||
+      item.state?.toLowerCase().includes(searchInput.toLowerCase()) ||
+      item.summary?.toLowerCase().includes(searchInput.toLowerCase()) ||
+      (item.year && item.year.toString().includes(searchInput))
     );
 
     if (incidentTypeFilter) filtered = filtered.filter((item) => item.incident_type === incidentTypeFilter);
@@ -72,11 +68,7 @@ const CrimeMap = () => {
     if (yearFilter) filtered = filtered.filter((item) => item.year?.toString() === yearFilter);
 
     setFilteredData(filtered);
-  }, [searchQuery, incidentTypeFilter, cityFilter, stateFilter, yearFilter, crimeData]);
-
-  useEffect(() => {
-    filterData();
-  }, [filterData]);
+  }, [searchInput, incidentTypeFilter, cityFilter, stateFilter, yearFilter, crimeData]);
 
   if (isLoading) {
     return (
@@ -149,9 +141,9 @@ const CrimeMap = () => {
           <div className="relative group">
             <input
               type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && filterData()}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               placeholder="Search by incident type, city, state, or summary..."
               className="w-full p-5 pl-14 pr-32 text-slate-800 dark:text-white bg-white dark:bg-slate-800/50 backdrop-blur-md border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300"
             />
@@ -159,7 +151,7 @@ const CrimeMap = () => {
               <Search className="w-6 h-6" />
             </div>
             <button
-              onClick={() => filterData()}
+              onClick={() => handleSearch()}
               className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-95"
             >
               Search
