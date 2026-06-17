@@ -203,7 +203,7 @@ export default function MyReports() {
         setFirReports(flattened);
       })
       .catch(() => {
-        setError("Failed to load your FIR reports. Please try again later.");
+        setError("There are no files filled yet. Please fill the form to see your reports.");
       });
 
     const fetchSos = apiClient
