@@ -525,7 +525,7 @@ export default function MyReports() {
 
       {/* ── SOS Reports Section ── */}
       {sosReports.length > 0 && (
-        <section>
+      <section>
           <div className="flex items-center gap-2 mb-4">
             <Siren className="w-5 h-5 text-red-600 dark:text-red-400" />
             <h2 className="text-lg font-bold text-slate-800 dark:text-white">

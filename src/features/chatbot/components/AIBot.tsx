@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useChat } from "../hooks/useChat";
 import { motion, AnimatePresence } from "framer-motion";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { 
   Send, 
   X, 
@@ -79,7 +81,7 @@ export default function Chatbot({ onClose }: any) {
       opacity: 1, 
       y: 0, 
       scale: 1,
-      transition: { type: "spring", stiffness: 400, damping: 28 }
+      transition: { type: "spring" as const, stiffness: 400, damping: 28 }
     }
   };
 
@@ -177,7 +179,26 @@ export default function Chatbot({ onClose }: any) {
                         : "bg-white text-gray-800 border border-gray-100 rounded-tl-none hover:border-blue-100"
                     }`}
                   >
-                    <p className="leading-relaxed">{msg.text}</p>
+                    <div className={`leading-relaxed ${msg.sender === "user" ? "text-white" : "text-gray-800"}`}>
+                      {msg.sender === "bot" ? (
+                        <ReactMarkdown 
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />,
+                            ul: ({node, ...props}) => <ul className="list-disc ml-4 mb-2" {...props} />,
+                            ol: ({node, ...props}) => <ol className="list-decimal ml-4 mb-2" {...props} />,
+                            li: ({node, ...props}) => <li className="mb-1" {...props} />,
+                            a: ({node, ...props}) => <a className="text-blue-600 hover:underline font-medium" target="_blank" rel="noopener noreferrer" {...props} />,
+                            code: ({node, ...props}) => <code className="bg-gray-100 px-1 rounded text-xs font-mono" {...props} />,
+                            strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
+                          }}
+                        >
+                          {msg.text}
+                        </ReactMarkdown>
+                      ) : (
+                        <p>{msg.text}</p>
+                      )}
+                    </div>
                     
                     {msg.sender === "bot" && (
                       <motion.button 
