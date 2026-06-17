@@ -17,7 +17,7 @@ const DomesticTenantForm = lazy(() => import('@/features/fir/pages/DomesticHelp&
 const TheftEFIRForm = lazy(() => import('@/features/fir/pages/TheftEfir'));
 const CyberCrimeForm = lazy(() => import('@/features/fir/pages/CyberCrime'));
 const RapeCaseForm = lazy(() => import('@/features/fir/pages/RapeCase'));
-const SOSMainPage = lazy(() => import('@/components/sos'));
+const SOSMainPage = lazy(() => import('@/components/SOSPage'));
 const NearestPoliceStation = lazy(() => import('@/features/sos/pages/police_services'));
 const SOSReport = lazy(() => import('@/features/sos/pages/alert_services'));
 const CrimeMap = lazy(() => import('@/features/sos/pages/crime_cluster_service'));
