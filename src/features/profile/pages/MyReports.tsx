@@ -12,6 +12,8 @@ import {
   ShieldX,
   FilePlus,
   MapPin,
+  X,
+  ExternalLink,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -22,6 +24,7 @@ interface FirReport {
   fir_type: string;
   report_date: string;
   status?: string;
+  [key: string]: any; // Allow other properties
 }
 
 interface SosReport {
@@ -31,6 +34,7 @@ interface SosReport {
   longitude?: number;
   message?: string;
   status?: string;
+  [key: string]: any; // Allow other properties
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -159,6 +163,153 @@ function EmptyState() {
   );
 }
 
+// ─── Preview Modal ───────────────────────────────────────────────────────────
+
+interface PreviewModalProps {
+  report: FirReport | SosReport | null;
+  onClose: () => void;
+}
+
+function ReportPreviewModal({ report, onClose }: PreviewModalProps) {
+  if (!report) return null;
+
+  const isSos = !('fir_type' in report);
+  
+  // Clean up keys for display
+  const displayFields = Object.entries(report)
+    .filter(([key, value]) => {
+      const excludedKeys = ['id', 'display_type', 'fir_type', 'report_date', 'status', 'auth_id', 'created_at'];
+      return !excludedKeys.includes(key) && 
+             value !== null && 
+             value !== undefined && 
+             value !== "" &&
+             typeof value !== 'object';
+    })
+    .map(([key, value]) => ({
+      label: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      value: String(value)
+    }));
+
+  return (
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white dark:bg-slate-900 w-full max-w-2xl max-h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Modal Header */}
+        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className={`p-2.5 rounded-xl ${isSos ? 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400' : getFirIconBg((report as FirReport).fir_type)}`}>
+              {isSos ? <Siren className="w-6 h-6" /> : getFirIcon((report as FirReport).fir_type)}
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                {(report as FirReport).display_type || (report as SosReport).message || "SOS Alert"}
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Report ID: {report.id}
+              </p>
+            </div>
+          </div>
+          <button 
+            onClick={onClose}
+            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-500"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        {/* Modal Content */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {/* Status and Date Banner */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">Status</p>
+              <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${getStatusStyle(report.status)}`}>
+                {report.status || (isSos ? "Sent" : "Pending")}
+              </span>
+            </div>
+            <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">Date Submitted</p>
+              <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
+                <Calendar className="w-4 h-4 text-blue-500" />
+                <span className="text-sm font-medium">
+                  {new Date((report as FirReport).report_date || (report as SosReport).created_at).toLocaleDateString(undefined, {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Detailed Fields */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <Info className="w-4 h-4 text-blue-500" />
+              Report Details
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+              {displayFields.length > 0 ? (
+                displayFields.map((field, idx) => (
+                  <div key={idx} className="space-y-1">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{field.label}</p>
+                    <p className="text-sm font-medium text-slate-900 dark:text-white break-words">
+                      {field.value}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-slate-500 dark:text-slate-400 italic col-span-2">
+                  No additional details available for this report.
+                </p>
+              )}
+            </div>
+          </div>
+
+          {isSos && (report as SosReport).latitude && (
+            <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
+               <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-red-500" />
+                Location
+              </h3>
+              <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Coordinates</p>
+                  <p className="text-sm font-medium text-slate-900 dark:text-white">
+                    {(report as SosReport).latitude?.toFixed(6)}, {(report as SosReport).longitude?.toFixed(6)}
+                  </p>
+                </div>
+                <button 
+                  onClick={() => window.open(`https://www.google.com/maps?q=${(report as SosReport).latitude},${(report as SosReport).longitude}`, '_blank')}
+                  className="flex items-center gap-2 text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  View on Maps <ExternalLink className="w-3 h-3" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Modal Footer */}
+        <div className="p-6 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800">
+          <button 
+            onClick={onClose}
+            className="w-full py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-sm"
+          >
+            Close Preview
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function MyReports() {
@@ -166,6 +317,7 @@ export default function MyReports() {
   const [sosReports, setSosReports] = useState<SosReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedReport, setSelectedReport] = useState<FirReport | SosReport | null>(null);
 
   useEffect(() => {
     const fetchFirs = apiClient
@@ -272,6 +424,7 @@ export default function MyReports() {
             {firReports.map((report) => (
               <div
                 key={`fir-${report.fir_type}-${report.id}`}
+                onClick={() => setSelectedReport(report)}
                 className="bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 p-5 hover:shadow-md hover:border-blue-100 dark:hover:border-blue-900 transition-all cursor-pointer group"
               >
                 <div className="flex items-center justify-between">
@@ -329,7 +482,8 @@ export default function MyReports() {
             {sosReports.map((sos) => (
               <div
                 key={`sos-${sos.id}`}
-                className="bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 p-5 hover:shadow-md hover:border-red-100 dark:hover:border-red-900 transition-all group"
+                onClick={() => setSelectedReport(sos)}
+                className="bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 p-5 hover:shadow-md hover:border-red-100 dark:hover:border-red-900 transition-all cursor-pointer group"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
@@ -337,7 +491,7 @@ export default function MyReports() {
                       <Siren className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-slate-900 dark:text-white">
+                      <h3 className="font-semibold text-slate-900 dark:text-white group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
                         {sos.message || "Emergency SOS Alert"}
                       </h3>
                       <div className="flex items-center gap-4 mt-1 text-xs text-slate-500 dark:text-slate-400">
@@ -354,17 +508,26 @@ export default function MyReports() {
                       </div>
                     </div>
                   </div>
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusStyle(sos.status)}`}
-                  >
-                    {sos.status || "Sent"}
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusStyle(sos.status)}`}
+                    >
+                      {sos.status || "Sent"}
+                    </span>
+                    <ChevronRight className="w-5 h-5 text-slate-300 dark:text-slate-600 group-hover:text-red-500 transition-colors" />
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         </section>
       )}
-    </div>
+
+      {/* ── Preview Modal ── */}
+      <ReportPreviewModal 
+        report={selectedReport} 
+        onClose={() => setSelectedReport(null)} 
+      />
+  </div>
   );
 }
