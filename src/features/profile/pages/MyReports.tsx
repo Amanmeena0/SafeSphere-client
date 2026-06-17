@@ -171,10 +171,27 @@ interface PreviewModalProps {
 }
 
 function ReportPreviewModal({ report, onClose }: PreviewModalProps) {
+  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
+
   if (!report) return null;
 
   const isSos = !('fir_type' in report);
   
+  // Helper to check if a string is a base64 image or a URL to an image
+  const isImageValue = (value: any) => {
+    if (typeof value !== 'string') return false;
+    // Check for base64 image
+    if (value.startsWith('data:image/') || value.length > 1000) return true; 
+    // Check for image URL
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+    return imageExtensions.some(ext => value.toLowerCase().endsWith(ext)) || value.includes('blob:');
+  };
+
+  const isFileField = (key: string) => {
+    const fileKeys = ['photo', 'document', 'attachment', 'evidence', 'upload_document', 'digitalEvidence', 'documentation'];
+    return fileKeys.some(fk => key.toLowerCase().includes(fk));
+  };
+
   // Clean up keys for display
   const displayFields = Object.entries(report)
     .filter(([key, value]) => {
@@ -186,6 +203,7 @@ function ReportPreviewModal({ report, onClose }: PreviewModalProps) {
              typeof value !== 'object';
     })
     .map(([key, value]) => ({
+      key,
       label: key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
       value: String(value)
     }));
@@ -256,14 +274,54 @@ function ReportPreviewModal({ report, onClose }: PreviewModalProps) {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
               {displayFields.length > 0 ? (
-                displayFields.map((field, idx) => (
-                  <div key={idx} className="space-y-1">
-                    <p className="text-xs text-slate-500 dark:text-slate-400">{field.label}</p>
-                    <p className="text-sm font-medium text-slate-900 dark:text-white break-words">
-                      {field.value}
-                    </p>
-                  </div>
-                ))
+                displayFields.map((field, idx) => {
+                  const isImage = isImageValue(field.value) || isFileField(field.key);
+                  const hasFailed = failedImages[field.key];
+                  
+                  return (
+                    <div key={idx} className={`space-y-1 ${isImage ? 'col-span-2' : ''}`}>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{field.label}</p>
+                      {isImage && !hasFailed ? (
+                        <div className="mt-2 relative group max-w-sm">
+                          <img 
+                            src={field.value.startsWith('data:') ? field.value : (field.value.startsWith('http') ? field.value : `data:image/jpeg;base64,${field.value}`)} 
+                            alt={field.label}
+                            className="rounded-2xl border border-slate-200 dark:border-slate-700 w-full object-cover max-h-64 shadow-sm group-hover:shadow-md transition-shadow"
+                            onError={() => setFailedImages(prev => ({ ...prev, [field.key]: true }))}
+                          />
+                          <button 
+                            onClick={() => window.open(field.value.startsWith('data:') ? field.value : (field.value.startsWith('http') ? field.value : `data:image/jpeg;base64,${field.value}`), '_blank')}
+                            className="absolute top-2 right-2 p-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                          >
+                            <ExternalLink className="w-4 h-4 text-slate-700 dark:text-slate-300" />
+                          </button>
+                        </div>
+                      ) : isImage && hasFailed ? (
+                        <div className="mt-2 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-between group">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
+                              <FileText className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 dark:text-white">Document / File</p>
+                              <p className="text-[10px] text-slate-500 truncate max-w-[150px]">{field.value.substring(0, 30)}...</p>
+                            </div>
+                          </div>
+                          <button 
+                            onClick={() => window.open(field.value.startsWith('data:') ? field.value : (field.value.startsWith('http') ? field.value : `data:image/jpeg;base64,${field.value}`), '_blank')}
+                            className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full transition-colors"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ) : (
+                        <p className="text-sm font-medium text-slate-900 dark:text-white break-words">
+                          {field.value}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })
               ) : (
                 <p className="text-sm text-slate-500 dark:text-slate-400 italic col-span-2">
                   No additional details available for this report.
