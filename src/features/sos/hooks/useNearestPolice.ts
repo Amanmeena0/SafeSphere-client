@@ -12,10 +12,12 @@ export const useNearestPolice = () => {
     setError(null);
     try {
       const stations = await sosService.getNearestPoliceStations(lat, lon);
-      setNearestStations(stations);
+      // Ensure we got an array back
+      setNearestStations(Array.isArray(stations) ? stations : []);
     } catch (err) {
       console.error("Error fetching stations:", err);
-      setError("Error fetching nearby police stations.");
+      setError("Error fetching nearby police stations. The server might be down or returned an error.");
+      setNearestStations([]);
     } finally {
       setIsSearching(false);
     }

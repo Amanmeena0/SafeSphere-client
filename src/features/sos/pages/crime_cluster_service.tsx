@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 // @ts-ignore: Allow side-effect CSS import without type declarations
 import "leaflet/dist/leaflet.css";
@@ -13,7 +13,8 @@ import {
   Calendar, 
   Activity,
   ChevronDown,
-  Loader2
+  Loader2,
+  AlertTriangle
 } from "lucide-react";
 import { useCrimeClusters } from "../hooks/useCrimeClusters";
 
@@ -39,6 +40,7 @@ const CrimeMap = () => {
   const { crimeData, isLoading, error } = useCrimeClusters();
   const [filteredData, setFilteredData] = useState([]);
   const [searchInput, setSearchInput] = useState("");
+  const mapRef = useRef();
 
   // Filter states
   const [incidentTypeFilter, setIncidentTypeFilter] = useState("");
@@ -46,29 +48,44 @@ const CrimeMap = () => {
   const [stateFilter, setStateFilter] = useState("");
   const [yearFilter, setYearFilter] = useState("");
 
-  // Extract unique values for dropdowns
-  const getUniqueValues = (key) => {
-    return [...new Set(crimeData.map((item) => item[key]).filter(Boolean))].sort();
-  };
-
   const handleSearch = useCallback(() => {
-    if (!crimeData) return;
+    if (!crimeData || !Array.isArray(crimeData)) {
+      setFilteredData([]);
+      return;
+    }
     
-    let filtered = crimeData.filter((item) =>
-      item.incident_type?.toLowerCase().includes(searchInput.toLowerCase()) ||
-      item.city?.toLowerCase().includes(searchInput.toLowerCase()) ||
-      item.state?.toLowerCase().includes(searchInput.toLowerCase()) ||
-      item.summary?.toLowerCase().includes(searchInput.toLowerCase()) ||
-      (item.year && item.year.toString().includes(searchInput))
-    );
+    let filtered = crimeData.filter((item) => {
+      if (!item) return false;
+      
+      const matchesSearch = !searchInput || [
+        item.incident_type,
+        item.city,
+        item.state,
+        item.summary,
+        item.year?.toString()
+      ].some(val => val?.toLowerCase().includes(searchInput.toLowerCase()));
 
-    if (incidentTypeFilter) filtered = filtered.filter((item) => item.incident_type === incidentTypeFilter);
-    if (cityFilter) filtered = filtered.filter((item) => item.city === cityFilter);
-    if (stateFilter) filtered = filtered.filter((item) => item.state === stateFilter);
-    if (yearFilter) filtered = filtered.filter((item) => item.year?.toString() === yearFilter);
+      const matchesIncidentType = !incidentTypeFilter || item.incident_type === incidentTypeFilter;
+      const matchesCity = !cityFilter || item.city === cityFilter;
+      const matchesState = !stateFilter || item.state === stateFilter;
+      const matchesYear = !yearFilter || item.year?.toString() === yearFilter;
+
+      return matchesSearch && matchesIncidentType && matchesCity && matchesState && matchesYear;
+    });
 
     setFilteredData(filtered);
   }, [searchInput, incidentTypeFilter, cityFilter, stateFilter, yearFilter, crimeData]);
+
+  // Initial population and update on filter change
+  useEffect(() => {
+    handleSearch();
+  }, [crimeData, handleSearch]);
+
+  // Extract unique values for dropdowns
+  const getUniqueValues = (key) => {
+    if (!crimeData || !Array.isArray(crimeData)) return [];
+    return [...new Set(crimeData.map((item) => item[key]).filter(Boolean))].sort();
+  };
 
   if (isLoading) {
     return (
@@ -88,9 +105,9 @@ const CrimeMap = () => {
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#061224] p-6">
         <div className="max-w-md w-full bg-white dark:bg-slate-800 p-8 rounded-[2rem] border border-red-100 dark:border-red-900/30 shadow-xl text-center">
           <div className="w-16 h-16 bg-red-50 dark:bg-red-900/20 rounded-2xl flex items-center justify-center text-red-600 dark:text-red-400 mx-auto mb-6">
-            <Activity className="w-8 h-8" />
+            <AlertTriangle className="w-8 h-8" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Fetch failed</h2>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Service Unavailable</h2>
           <p className="text-slate-500 dark:text-slate-400 mb-8">{error}</p>
           <button 
             onClick={() => window.location.reload()}
@@ -219,13 +236,14 @@ const CrimeMap = () => {
                 zoom={4.2}
                 style={{ height: "100%", width: "100%" }}
                 scrollWheelZoom={true}
+                ref={mapRef}
               >
                 <TileLayer
                   attribution='&copy; OpenStreetMap contributors'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
-                {filteredData.map((item, idx) =>
-                  item.latitude && item.longitude ? (
+                {Array.isArray(filteredData) && filteredData.map((item, idx) =>
+                  item && item.latitude && item.longitude && !isNaN(item.latitude) && !isNaN(item.longitude) ? (
                     <Marker key={idx} position={[item.latitude, item.longitude]}>
                       <Popup>
                         <div className="p-3 min-w-[220px] font-sans">
@@ -267,7 +285,7 @@ const CrimeMap = () => {
                 <h2 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Intelligence Ledger</h2>
               </div>
               <div className="bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-5 py-2 rounded-full text-sm font-bold border border-indigo-100 dark:border-indigo-800 shadow-sm">
-                {filteredData.length} Records Detected
+                {Array.isArray(filteredData) ? filteredData.length : 0} Records Detected
               </div>
             </div>
             
@@ -283,7 +301,7 @@ const CrimeMap = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
-                    {filteredData.map((item, idx) => (
+                    {Array.isArray(filteredData) && filteredData.map((item, idx) => (
                       <tr key={idx} className="hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-colors">
                         <td className="p-5">
                           <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800">
@@ -307,7 +325,7 @@ const CrimeMap = () => {
                   </tbody>
                 </table>
 
-                {filteredData.length === 0 && (
+                {(!Array.isArray(filteredData) || filteredData.length === 0) && (
                   <div className="p-16 text-center">
                     <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl">
                       🔍

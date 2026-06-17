@@ -13,7 +13,8 @@ import {
   Phone, 
   ShieldCheck,
   ChevronRight,
-  Info
+  Info,
+  AlertTriangle
 } from "lucide-react";
 import { useNearestPolice } from "../hooks/useNearestPolice";
 
@@ -30,7 +31,9 @@ L.Icon.Default.mergeOptions({
 const MapViewUpdater = ({ position, zoom }) => {
   const map = useMap();
   useEffect(() => {
-    map.setView(position, zoom);
+    if (position && !isNaN(position[0]) && !isNaN(position[1])) {
+      map.setView(position, zoom);
+    }
   }, [position, zoom, map]);
   return null;
 };
@@ -101,7 +104,7 @@ export default function NearestPoliceMap() {
   };
 
   const panToStation = (coordinates) => {
-    if (mapRef.current) {
+    if (mapRef.current && coordinates && !isNaN(coordinates[0]) && !isNaN(coordinates[1])) {
       mapRef.current.setView(coordinates, 17); 
     }
   };
@@ -139,7 +142,7 @@ export default function NearestPoliceMap() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="bg-white dark:bg-slate-800/40 backdrop-blur-md rounded-[2.5rem] shadow-2xl p-8 mb-12 border border-slate-200 dark:border-slate-700/50"
+          className="bg-white dark:bg-slate-800/40 backdrop-blur-md rounded-[2.5rem] shadow-2xl p-8 mb-8 border border-slate-200 dark:border-slate-700/50"
         >
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative group">
@@ -173,6 +176,23 @@ export default function NearestPoliceMap() {
           </div>
         </motion.div>
 
+        {/* Error Message */}
+        {error && (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-6 rounded-3xl mb-12 border border-red-200 dark:border-red-800 shadow-sm flex items-center gap-4"
+          >
+            <div className="p-3 bg-red-100 dark:bg-red-900/40 rounded-2xl">
+              <AlertTriangle className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="font-bold text-lg leading-tight mb-1">Service Interruption</p>
+              <p className="text-sm font-medium opacity-80">{error}</p>
+            </div>
+          </motion.div>
+        )}
+
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
           {/* List Section */}
           <motion.div 
@@ -190,7 +210,7 @@ export default function NearestPoliceMap() {
 
             <div className="space-y-4">
               <AnimatePresence mode="popLayout">
-                {nearestStations.length > 0 ? (
+                {Array.isArray(nearestStations) && nearestStations.length > 0 ? (
                   nearestStations.map((station, index) => (
                     <motion.div 
                       key={station.name + index}
@@ -277,9 +297,7 @@ export default function NearestPoliceMap() {
                 center={userPosition || [20.5937, 78.9629]}
                 zoom={userPosition ? mapZoom : 5}
                 className="w-full h-full"
-                whenCreated={(mapInstance) => {
-                  mapRef.current = mapInstance;
-                }}
+                ref={mapRef}
               >
                 <TileLayer
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -305,31 +323,33 @@ export default function NearestPoliceMap() {
                   </Marker>
                 )}
 
-                {nearestStations.map((station, index) => (
-                  <Marker
-                    key={station.name + index}
-                    position={station.coordinates}
-                    icon={L.divIcon({
-                      html: `
-                        <div style="background: #EF4444; border: 3px solid white; border-radius: 50%; width: 16px; height: 16px; box-shadow: 0 0 15px rgba(239, 68, 68, 0.6); display: flex; align-items: center; justify-content: center; color: white; font-size: 8px; font-weight: bold;">
-                          ${index + 1}
+                {Array.isArray(nearestStations) && nearestStations.map((station, index) => (
+                  station.coordinates && !isNaN(station.coordinates[0]) && !isNaN(station.coordinates[1]) && (
+                    <Marker
+                      key={station.name + index}
+                      position={station.coordinates}
+                      icon={L.divIcon({
+                        html: `
+                          <div style="background: #EF4444; border: 3px solid white; border-radius: 50%; width: 16px; height: 16px; box-shadow: 0 0 15px rgba(239, 68, 68, 0.6); display: flex; align-items: center; justify-content: center; color: white; font-size: 8px; font-weight: bold;">
+                            ${index + 1}
+                          </div>
+                        `,
+                        iconSize: [16, 16],
+                        iconAnchor: [8, 8],
+                      })}
+                    >
+                      <Popup>
+                        <div className="p-3 min-w-[180px]">
+                          <div className="font-bold text-red-600 mb-1">🚔 {station.name}</div>
+                          <div className="text-xs text-slate-500 mb-2">{station.district}, {station.state}</div>
+                          <div className="flex items-center gap-2 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full w-fit">
+                            <Navigation className="w-2.5 h-2.5" />
+                            {station.distance_km} KM AWAY
+                          </div>
                         </div>
-                      `,
-                      iconSize: [16, 16],
-                      iconAnchor: [8, 8],
-                    })}
-                  >
-                    <Popup>
-                      <div className="p-3 min-w-[180px]">
-                        <div className="font-bold text-red-600 mb-1">🚔 {station.name}</div>
-                        <div className="text-xs text-slate-500 mb-2">{station.district}, {station.state}</div>
-                        <div className="flex items-center gap-2 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full w-fit">
-                          <Navigation className="w-2.5 h-2.5" />
-                          {station.distance_km} KM AWAY
-                        </div>
-                      </div>
-                    </Popup>
-                  </Marker>
+                      </Popup>
+                    </Marker>
+                  )
                 ))}
               </MapContainer>
             </div>
