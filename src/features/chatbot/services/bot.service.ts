@@ -2,6 +2,7 @@ import apiClient from '@/lib/apiClient';
 
 export interface BotGenerateResponse {
   task_id: string;
+  result?: string;
 }
 
 export interface BotStatusResponse {
@@ -13,8 +14,9 @@ export interface BotStatusResponse {
 export const botService = {
   /**
    * Starts the answer generation process.
+   * Now synchronous - returns the result immediately.
    * @param query The user's question
-   * @returns A task_id to poll for the result
+   * @returns The final result and a task_id
    */
   generateAnswer: async (query: string): Promise<BotGenerateResponse> => {
     const response = await apiClient.post('/api/bot/generate', { query });

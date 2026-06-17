@@ -48,14 +48,18 @@ export const useChat = (initialMessages: Message[] = []) => {
 
     try {
       // 1. Submit Query
-      const { task_id } = await botService.generateAnswer(messageText);
+      const { task_id, result } = await botService.generateAnswer(messageText);
 
-      // 2. Poll for Results
-      const resultText = await pollStatus(task_id);
+      // 2. Get Results (Use immediate result if available, otherwise poll)
+      let resultText = result;
+      
+      if (!resultText) {
+        resultText = await pollStatus(task_id);
+      }
 
       const botMessage: Message = {
         sender: "bot",
-        text: resultText,
+        text: resultText || "I'm sorry, I couldn't generate a response.",
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
       setMessages((prev) => [...prev, botMessage]);
