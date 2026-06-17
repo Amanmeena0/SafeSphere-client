@@ -1,7 +1,7 @@
 {
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/((?!assets/|public/|favicon.ico|crime_data.csv|crime_clusters.csv).*)",
       "destination": "/index.html"
     }
   ]
