@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useSubmitFir } from "../hooks/useSubmitFir";
 import { AlertCircle, CheckCircle2, Loader2, ShieldCheck } from "lucide-react";
+import { fileToBase64 } from "@/shared/utils/fileUtils";
 
 export default function TheftEFIRForm() {
   const [formData, setFormData] = useState<any>({});
@@ -12,15 +13,6 @@ export default function TheftEFIRForm() {
       ...prev,
       [name]: files ? files[0] : value,
     }));
-  };
-
-  const fileToBase64 = (file: any): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve((reader.result as string).split(',')[1]);
-      reader.onerror = (error) => reject(error);
-    });
   };
 
   const handleSubmit = async (e: any) => {

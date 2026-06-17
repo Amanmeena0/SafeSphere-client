@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useSubmitFir } from "../hooks/useSubmitFir";
-import { AlertCircle, CheckCircle2, Loader2, ShieldCheck } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2, ShieldCheck, X } from "lucide-react";
+import { fileToBase64 } from "@/shared/utils/fileUtils";
 
 export default function CyberCrimeForm() {
   const [formData, setFormData] = useState<any>({});
@@ -8,18 +9,31 @@ export default function CyberCrimeForm() {
 
   const handleChange = (e: any) => {
     const { name, value, files } = e.target;
-    setFormData((prev: any) => ({
-      ...prev,
-      [name]: files ? (files.length > 1 ? Array.from(files) : files[0]) : value,
-    }));
+    if (files) {
+      const newFiles = Array.from(files);
+      setFormData((prev: any) => {
+        const existingFiles = prev[name] ? (Array.isArray(prev[name]) ? prev[name] : [prev[name]]) : [];
+        return {
+          ...prev,
+          [name]: [...existingFiles, ...newFiles],
+        };
+      });
+    } else {
+      setFormData((prev: any) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve((reader.result as string).split(',')[1]);
-      reader.onerror = (error) => reject(error);
+  const removeFile = (name: string, index: number) => {
+    setFormData((prev: any) => {
+      const existingFiles = Array.isArray(prev[name]) ? prev[name] : [prev[name]];
+      const newFiles = existingFiles.filter((_, i) => i !== index);
+      return {
+        ...prev,
+        [name]: newFiles.length > 0 ? newFiles : null,
+      };
     });
   };
 
@@ -235,25 +249,68 @@ export default function CyberCrimeForm() {
                 </h3>
                 <div>
                   <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">Upload Evidence (Screenshots, Logs, Emails)</label>
-                  <div className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-8 text-center hover:border-amber-500 dark:hover:border-amber-500 bg-white dark:bg-slate-800 transition-all duration-300">
-                    <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
-                      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                      </svg>
-                    </div>
-                    <input
-                      type="file"
-                      name="attachments"
-                      accept="image/*,application/pdf,.txt,.doc,.docx"
-                      className="hidden"
-                      id="evidence-upload"
-                      onChange={handleChange}
-                      multiple
-                    />
-                    <label htmlFor="evidence-upload" className="cursor-pointer">
-                      <span className="text-amber-600 dark:text-amber-400 font-bold text-lg hover:underline">Click to upload files</span>
-                      <p className="text-slate-500 dark:text-slate-400 text-sm mt-2 font-medium">Screenshots, PDFs, Documents - Max 10MB</p>
-                    </label>
+                  <div className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300 ${formData.attachments ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/10' : 'border-slate-300 dark:border-slate-700 hover:border-amber-500 dark:hover:border-amber-500 bg-white dark:bg-slate-800'}`}>
+                    {formData.attachments ? (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {(Array.isArray(formData.attachments) ? formData.attachments : [formData.attachments]).map((file: File, index: number) => (
+                            <div key={index} className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                              <div className="flex items-center space-x-3 overflow-hidden">
+                                <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg text-amber-600 dark:text-amber-400">
+                                  <CheckCircle2 className="w-5 h-5" />
+                                </div>
+                                <span className="text-sm font-bold text-slate-700 dark:text-slate-200 truncate">{file.name}</span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => removeFile('attachments', index)}
+                                className="p-1 text-slate-400 hover:text-red-600 transition-colors"
+                              >
+                                <X className="w-5 h-5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="pt-2">
+                          <input
+                            type="file"
+                            name="attachments"
+                            accept="image/*,application/pdf,.txt,.doc,.docx"
+                            className="hidden"
+                            id="evidence-upload-more"
+                            onChange={handleChange}
+                            multiple
+                          />
+                          <label htmlFor="evidence-upload-more" className="cursor-pointer text-amber-600 dark:text-amber-400 font-bold hover:underline inline-flex items-center">
+                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                            Add more files
+                          </label>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
+                          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                          </svg>
+                        </div>
+                        <input
+                          type="file"
+                          name="attachments"
+                          accept="image/*,application/pdf,.txt,.doc,.docx"
+                          className="hidden"
+                          id="evidence-upload"
+                          onChange={handleChange}
+                          multiple
+                        />
+                        <label htmlFor="evidence-upload" className="cursor-pointer">
+                          <span className="text-amber-600 dark:text-amber-400 font-bold text-lg hover:underline">Click to upload files</span>
+                          <p className="text-slate-500 dark:text-slate-400 text-sm mt-2 font-medium">Screenshots, PDFs, Documents - Max 10MB</p>
+                        </label>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
