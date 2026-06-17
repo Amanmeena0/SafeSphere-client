@@ -61,7 +61,7 @@ function App() {
           {/* sos components */}
           <Route path="/sos" element={<SOSMainPage />} />
           <Route path="/police_services" element={<NearestPoliceStation />} />
-          <Route path="/alert_services" element={<SOSReport />} />
+          <Route path="/alert_services" element={<ProtectedRoute><SOSReport /></ProtectedRoute>} />
           <Route path="/crime_cluster_service" element={<CrimeMap />} />
           <Route path="/contacts-police" element={<EmergencyContacts/>}/>
           

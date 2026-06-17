@@ -15,13 +15,17 @@ export interface PoliceStation {
 }
 
 export interface CrimeData {
-  "attack type": string;
+  incident_type: string;
   city: string;
   state: string;
   summary: string;
   year: number;
   day?: string;
   month?: string;
-  Latitude?: number;
-  Longitude?: number;
+  latitude: number;
+  longitude: number;
+  // Keep optional aliases for backward compatibility/local CSV
+  "attack type"?: string;
+  district?: string;
+  state_ut?: string;
 }

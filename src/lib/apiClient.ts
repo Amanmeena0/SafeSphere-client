@@ -25,6 +25,8 @@ export const setupInterceptors = (getToken, signOut) => {
       const token = await getToken();
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+      } else {
+        console.debug('No auth token available for request to:', config.url);
       }
     } catch (error) {
       console.error('Error fetching token:', error);
@@ -36,7 +38,8 @@ export const setupInterceptors = (getToken, signOut) => {
     (response) => response,
     async (error) => {
       if (error.response?.status === 401) {
-        console.warn('Unauthorized (401) response from backend. Verify JWT validation on FastAPI.');
+        console.error('Unauthorized (401) response from backend. This usually means the user is not logged in or the token has expired.');
+        // Optionally trigger a sign out or redirect to login if we know for sure it's an auth issue
       }
       return Promise.reject(error);
     }

@@ -41,7 +41,7 @@ const CrimeMap = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Filter states
-  const [attackTypeFilter, setAttackTypeFilter] = useState("");
+  const [incidentTypeFilter, setIncidentTypeFilter] = useState("");
   const [cityFilter, setCityFilter] = useState("");
   const [stateFilter, setStateFilter] = useState("");
   const [yearFilter, setYearFilter] = useState("");
@@ -59,20 +59,20 @@ const CrimeMap = () => {
 
   const filterData = useCallback(() => {
     let filtered = crimeData.filter((item) =>
-      item["attack type"]?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.incident_type?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.state?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.summary?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (item.year && item.year.toString().includes(searchQuery))
     );
 
-    if (attackTypeFilter) filtered = filtered.filter((item) => item["attack type"] === attackTypeFilter);
+    if (incidentTypeFilter) filtered = filtered.filter((item) => item.incident_type === incidentTypeFilter);
     if (cityFilter) filtered = filtered.filter((item) => item.city === cityFilter);
     if (stateFilter) filtered = filtered.filter((item) => item.state === stateFilter);
     if (yearFilter) filtered = filtered.filter((item) => item.year?.toString() === yearFilter);
 
     setFilteredData(filtered);
-  }, [searchQuery, attackTypeFilter, cityFilter, stateFilter, yearFilter, crimeData]);
+  }, [searchQuery, incidentTypeFilter, cityFilter, stateFilter, yearFilter, crimeData]);
 
   useEffect(() => {
     filterData();
@@ -86,6 +86,26 @@ const CrimeMap = () => {
           <p className="text-slate-600 dark:text-slate-400 font-bold animate-pulse">
             Loading Intelligence Data...
           </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#061224] p-6">
+        <div className="max-w-md w-full bg-white dark:bg-slate-800 p-8 rounded-[2rem] border border-red-100 dark:border-red-900/30 shadow-xl text-center">
+          <div className="w-16 h-16 bg-red-50 dark:bg-red-900/20 rounded-2xl flex items-center justify-center text-red-600 dark:text-red-400 mx-auto mb-6">
+            <Activity className="w-8 h-8" />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Fetch failed</h2>
+          <p className="text-slate-500 dark:text-slate-400 mb-8">{error}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="w-full py-4 bg-slate-900 dark:bg-blue-600 text-white font-bold rounded-xl hover:opacity-90 transition-opacity"
+          >
+            Retry Connection
+          </button>
         </div>
       </div>
     );
@@ -131,12 +151,19 @@ const CrimeMap = () => {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by attack type, city, state, or summary..."
-              className="w-full p-5 pl-14 pr-6 text-slate-800 dark:text-white bg-white dark:bg-slate-800/50 backdrop-blur-md border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300"
+              onKeyDown={(e) => e.key === 'Enter' && filterData()}
+              placeholder="Search by incident type, city, state, or summary..."
+              className="w-full p-5 pl-14 pr-32 text-slate-800 dark:text-white bg-white dark:bg-slate-800/50 backdrop-blur-md border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300"
             />
             <div className="absolute left-5 top-1/2 transform -translate-y-1/2 text-slate-400 group-hover:text-blue-500 transition-colors">
               <Search className="w-6 h-6" />
             </div>
+            <button
+              onClick={() => filterData()}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-95"
+            >
+              Search
+            </button>
           </div>
         </motion.div>
 
@@ -153,7 +180,7 @@ const CrimeMap = () => {
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { label: 'Attack Type', value: attackTypeFilter, setter: setAttackTypeFilter, key: 'attack type' },
+              { label: 'Incident Type', value: incidentTypeFilter, setter: setIncidentTypeFilter, key: 'incident_type' },
               { label: 'City', value: cityFilter, setter: setCityFilter, key: 'city' },
               { label: 'State', value: stateFilter, setter: setStateFilter, key: 'state' },
               { label: 'Year', value: yearFilter, setter: setYearFilter, key: 'year' },
@@ -206,11 +233,11 @@ const CrimeMap = () => {
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
                 {filteredData.map((item, idx) =>
-                  item.Latitude && item.Longitude ? (
-                    <Marker key={idx} position={[item.Latitude, item.Longitude]}>
+                  item.latitude && item.longitude ? (
+                    <Marker key={idx} position={[item.latitude, item.longitude]}>
                       <Popup>
                         <div className="p-3 min-w-[220px] font-sans">
-                          <div className="text-base font-bold text-red-600 mb-2 border-b pb-2">{item["attack type"]}</div>
+                          <div className="text-base font-bold text-red-600 mb-2 border-b pb-2">{item.incident_type}</div>
                           <div className="space-y-2">
                             <div className="text-sm text-slate-700 flex items-center gap-2">
                               <MapPin className="w-3.5 h-3.5 text-slate-400" />
@@ -257,7 +284,7 @@ const CrimeMap = () => {
                 <table className="w-full table-auto border-collapse text-sm">
                   <thead className="bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 sticky top-0 z-10">
                     <tr>
-                      <th className="p-5 text-left font-bold uppercase tracking-wider text-xs">Attack Type</th>
+                      <th className="p-5 text-left font-bold uppercase tracking-wider text-xs">Incident Type</th>
                       <th className="p-5 text-left font-bold uppercase tracking-wider text-xs">Location</th>
                       <th className="p-5 text-left font-bold uppercase tracking-wider text-xs">Date</th>
                       <th className="p-5 text-left font-bold uppercase tracking-wider text-xs">Intelligence</th>
@@ -268,7 +295,7 @@ const CrimeMap = () => {
                       <tr key={idx} className="hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-colors">
                         <td className="p-5">
                           <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800">
-                            {item["attack type"]}
+                            {item.incident_type}
                           </span>
                         </td>
                         <td className="p-5">

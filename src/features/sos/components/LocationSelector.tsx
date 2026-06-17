@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 import type { } from 'mapbox-gl';
 import { MapPin, Loader2, Navigation, AlertCircle } from 'lucide-react';
 import { useCurrentLocation } from "@/shared/hooks/useCurrentLocation";
