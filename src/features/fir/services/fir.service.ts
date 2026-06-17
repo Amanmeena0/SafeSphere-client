@@ -111,13 +111,13 @@ export interface RapeCaseSubmission extends BaseFirSubmission {
 
 export const firService = {
   submitTheftEfir: async (data: TheftEfirSubmission) => {
-    return await apiClient.post('/api/fir/theft', data);
+    return await apiClient.post('/api/fir/theft-efir', data);
   },
   submitCyberCrime: async (data: CyberCrimeSubmission) => {
     return await apiClient.post('/api/fir/cyber-crime', data);
   },
   submitDomesticHelp: async (data: DomesticHelpSubmission) => {
-    return await apiClient.post('/api/fir/domestic-help', data);
+    return await apiClient.post('/api/fir/domestic-violence', data);
   },
   submitLostItem: async (data: LostItemSubmission) => {
     return await apiClient.post('/api/fir/lost-item', data);

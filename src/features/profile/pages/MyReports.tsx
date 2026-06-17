@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import apiClient from "@/lib/apiClient";
+import { profileService } from "../services/profile.service";
 import {
   FileText,
   Calendar,
@@ -378,10 +378,9 @@ export default function MyReports() {
   const [selectedReport, setSelectedReport] = useState<FirReport | SosReport | null>(null);
 
   useEffect(() => {
-    const fetchFirs = apiClient
-      .get("/api/profile/firs")
-      .then((res) => {
-        const rawData = res.data;
+    const fetchFirs = profileService
+      .getUserFirs()
+      .then((rawData) => {
         const flattened: FirReport[] = [];
 
         Object.keys(rawData).forEach((key) => {
@@ -412,18 +411,18 @@ export default function MyReports() {
         );
         setFirReports(flattened);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error("Error fetching FIRs:", err);
         setError("There are no files filled yet. Please fill the form to see your reports.");
       });
 
-    const fetchSos = apiClient
-      .get("/api/profile/sos")
-      .then((res) => {
-        const data = Array.isArray(res.data) ? res.data : [];
-        setSosReports(data);
+    const fetchSos = profileService
+      .getUserSos()
+      .then((data) => {
+        setSosReports(Array.isArray(data) ? data : []);
       })
-      .catch(() => {
-        // SOS endpoint might not exist yet — fail silently
+      .catch((err) => {
+        console.error("Error fetching SOS reports:", err);
         setSosReports([]);
       });
 
